@@ -63,6 +63,11 @@ public class Class {
 	}
 	
 	@Override
+	public int hashCode() {
+		return Integer.parseInt(name);
+		
+	}
+	@Override
 	public boolean equals(Object c) {
 		return this.name.equals(c.toString());
 	}
