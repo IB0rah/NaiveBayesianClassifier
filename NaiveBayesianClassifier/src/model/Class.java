@@ -56,19 +56,26 @@ public class Class {
 		}
 		return score;
 	}
-	
+
+	public String getName() {
+		return name;
+	}
+
 	@Override
 	public String toString() {
-		return name;
+		return "Class: " + name;
 	}
 	
 	@Override
 	public int hashCode() {
-		return Integer.parseInt(name);
-		
+		int hash = 0;
+		for (int i = 0; i < name.length(); i++) {
+			hash = hash*31 + name.charAt(i);
+		}
+		return hash;
 	}
 	@Override
 	public boolean equals(Object c) {
-		return this.name.equals(c.toString());
+		return this.name.equals(((Class) c).getName());
 	}
 }
