@@ -17,14 +17,10 @@ public class Class {
 	}
 	
 	public void train(List<Document> documents) {
-		for(Document doc: documents) {
-			this.train(doc);
-		}
+		documents.forEach(this::train);
 	}
 	public void train(Document document) {
-		for(String word: document.getWords()) {
-			putWord(word);
-		}
+		document.getWords().forEach(this::putWord);
 	}
 	
 	//Add a word
