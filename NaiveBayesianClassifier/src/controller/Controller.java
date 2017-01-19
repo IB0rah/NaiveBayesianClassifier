@@ -49,7 +49,12 @@ public class Controller {
         return baysianClassifier;
     }
 
-    public void classify() {
+    public Class classify() {
         //TODO
+        return null;
+    }
+
+    public Map<Class, List<Document>> getClassAndDocs() {
+        return classAndDocs;
     }
 }
