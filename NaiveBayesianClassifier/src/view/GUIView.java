@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import model.Document;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,7 +69,9 @@ public class GUIView extends Application {
             if (!(classText.equals("Class...") || classText.equals(""))) {
                 List<File> files = fileChooser.showOpenMultipleDialog(primaryStage);
                 List<Document> documents = new ArrayList<>();
-                if (files != null) documents.addAll(files.stream().map(Document::new).collect(Collectors.toList()));
+                if (files != null) {
+                	documents.addAll(files.stream().map(Document::new).collect(Collectors.toList()));
+                }
                 controller.addClassWithDocs(new Class(classText, controller.getBaysianClassifier()), documents);
                 if (controller.canTrain() && !controller.canClassify()) trn.setVisible(true);
                 if (controller.canClassify()) cls.setVisible(true);
