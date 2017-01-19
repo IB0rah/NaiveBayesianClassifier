@@ -61,4 +61,9 @@ public class Class {
 	public String toString() {
 		return name;
 	}
+	
+	@Override
+	public boolean equals(Object c) {
+		return this.name.equals(c.toString());
+	}
 }
