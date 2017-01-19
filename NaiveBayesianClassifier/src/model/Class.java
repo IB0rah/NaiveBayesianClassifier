@@ -19,37 +19,52 @@ public class Class {
 	public void train(List<Document> documents) {
 		documents.forEach(this::train);
 	}
+
+//	public void train(Document document) {
+//		document.getWords().forEach(this::putWord);
+//		for(String word: bagOfWords.keySet()) {
+//			double conditionalProbability = ((double)(bagOfWords.get(word) + SMOOTHING)) /((double)(totalNumberOfWords + SMOOTHING * bc.getVocabularySize()));
+//			//System.out.println("Added : " + word + " " + conditionalProbability);
+//			conditionalProbabilities.put(word, conditionalProbability );
+//		}
+//	}
+
 	public void train(Document document) {
-		document.getWords().forEach(this::putWord);
+		document.getWords().forEach(this::putWordTrain);
 	}
-	
+
 	//Add a word
-	public void putWord(String word) {
+	public void putWordTrain(String word) {
 		totalNumberOfWords++;
 		if(bagOfWords.containsKey(word)) {
 			bagOfWords.put(word, bagOfWords.get(word) + 1);
 		} else {
 			bagOfWords.put(word, 1);
 		}
-		double conditionalProbability = (bagOfWords.get(word) + SMOOTHING) /(totalNumberOfWords + SMOOTHING * bc.getVocabularySize());   
-		conditionalProbabilities.put(word, conditionalProbability );
+//		System.out.println("bag of words get :  " + bagOfWords.get(word) + "total nr : " + totalNumberOfWords + " vocabsize " + bc.getVocabularySize());
 	}
-	
+
 	public double getDocumentConditionalProbability(Document doc) {
-		double score = 0;
+		
+		ConProbsString();
+		System.out.println(" Hoe dan");
+		double score = 1;
 		for(String word : doc.getWords()) {
-			score =  score * getWordConditionalProbability(word);
+			score =  score + getWordConditionalProbability(word);
+			System.out.println("Score : " + score);
 		}
 		return score;
 	}
 	
 	public double getWordConditionalProbability(String word) {
 		double score;
+		//System.out.println("Is it in the table?" + conditionalProbabilities.containsKey(word));
 		if(conditionalProbabilities.containsKey(word)) {
-			score = (bagOfWords.get(word) + SMOOTHING) /(totalNumberOfWords + SMOOTHING * bc.getVocabularySize());
+			score = conditionalProbabilities.get(word);
 		} else {
-			score = (0 + SMOOTHING) /(totalNumberOfWords + SMOOTHING * bc.getVocabularySize());
+			score = Math.log10(((double)(0 + SMOOTHING)) /((double)(totalNumberOfWords + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
 		}
+		//System.out.println("Word score : " + score + " : " + word);
 		return score;
 	}
 
@@ -73,5 +88,13 @@ public class Class {
 	@Override
 	public boolean equals(Object c) {
 		return this.name.equals(((Class) c).getName());
+	}
+	
+	public String ConProbsString() {
+		String result = "";
+		for(String word: conditionalProbabilities.keySet()) {
+			//System.out.println(word + "prob: " + conditionalProbabilities.get(word));
+		}
+		return result;
 	}
 }

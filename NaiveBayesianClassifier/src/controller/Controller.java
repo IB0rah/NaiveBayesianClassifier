@@ -34,7 +34,7 @@ public class Controller {
 
     public void train() {
         isTrained = true;
-        //TODO
+        baysianClassifier.train(classAndDocs);
     }
 
     public boolean canClassify() {
@@ -49,9 +49,9 @@ public class Controller {
         return baysianClassifier;
     }
 
-    public Class classify() {
-        //TODO
-        return null;
+
+    public Class classify(Document doc) {
+        return baysianClassifier.classify(doc);
     }
 
     public Map<Class, List<Document>> getClassAndDocs() {

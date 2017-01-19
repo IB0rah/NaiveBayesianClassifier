@@ -16,16 +16,14 @@ public class BayesianClassifier {
 	}
 	
 	public void train(Map<Class, List<Document>> trainingsData) {
-		List<String> vocabulary = extractVocabulary(trainingsData);
-		int docsCount = CountNumberOfDocs(trainingsData);
+		this.vocabulary = extractVocabulary(trainingsData);
+		this.documentCount = CountNumberOfDocs(trainingsData);
 		for(Class c: trainingsData.keySet()) {
-			double classPrior = trainingsData.get(c).size() / docsCount;
+			double classPrior = Math.log10(((double)trainingsData.get(c).size()) / ((double)documentCount)) / Math.log10(2.);
 			classes.put(c, classPrior);
 			c.train(trainingsData.get(c));
 		}
-		
-		this.vocabulary = vocabulary;
-		this.documentCount = docsCount;
+		System.out.println("Done training");
 	}
 	
 	public int CountNumberOfDocs(Map<Class, List<Document>> trainingsData) {
@@ -56,14 +54,19 @@ public class BayesianClassifier {
 	
 	public Class classify(Document doc) {
 		Class result = null;
-		double resultValue = 0;
+		double resultValue = -Double.MAX_VALUE;
 		for(Class c: classes.keySet()) {
-			double classProbability = Math.log10(classes.get(c) + c.getDocumentConditionalProbability(doc)) / Math.log10(2.);
+			System.out.println("prior : " + classes.get(c) + c.getName());
+			System.out.println("Conditional probability: " + c.getDocumentConditionalProbability(doc));
+			double classProbability = classes.get(c) + c.getDocumentConditionalProbability(doc);
+//			System.out.println(c.toString() + " " + classProbability );
+			System.out.println(classProbability >= resultValue);
 			if(classProbability >= resultValue) {
 				resultValue = classProbability;
 				result = c;
 			}
 		}
+		System.out.println("Classified as: " + result.getName());
 		return result;
 	}
 	

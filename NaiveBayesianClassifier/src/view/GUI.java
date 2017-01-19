@@ -92,7 +92,7 @@ public class GUI extends Application {
 
         classify.setOnAction(event -> {
             if (inputDocuments.size() == 1) {
-                Class resultClass = controller.classify();
+                Class resultClass = controller.classify(inputDocuments.get(0));
                 showResult(resultClass);
             } else {
                 showPopup("Please only select one file to Classify");
@@ -140,9 +140,7 @@ public class GUI extends Application {
         for (Node n : right.getChildren()) n.setVisible(false);
     }
 
-    private boolean validClass() {
-        return !className.getText().equals(STANDARDTEXT) && !className.getText().equals("");
-    }
+    private boolean validClass() { return !className.getText().equals(STANDARDTEXT) && !className.getText().equals(""); }
 
     private void updateClassList() {
         String list = CLASSLISTSTART;
