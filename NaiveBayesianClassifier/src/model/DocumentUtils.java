@@ -1,20 +1,20 @@
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DocumentUtils {
-	
-	private static List<String> stopwords = new ArrayList<String>();
-	
-	public static List<String> tokenize(Document doc) {
-		List<String> result = new ArrayList<String>();
-		for(String word: doc.getWords()) {
-			String lowercased = word.toLowerCase();
-			if(!stopwords.contains(lowercased)) {
-				result.add(lowercased);
-			}
-		}
-		
-		return result;
-	}
+    private static List<String> stopwords = new ArrayList<String>();
+
+    public static List<String> tokenize(List<String> strings) {
+        List<String> result = new ArrayList<>();
+        for (String word : strings) {
+            String lowercased = word.toLowerCase();
+            if (!stopwords.contains(lowercased)) {
+                result.add(lowercased);
+            }
+        }
+
+        return result;
+    }
 }
