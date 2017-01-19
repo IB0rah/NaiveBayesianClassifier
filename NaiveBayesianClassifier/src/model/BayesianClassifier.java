@@ -56,10 +56,14 @@ public class BayesianClassifier {
 	
 	public Class classify(Document doc) {
 		Class result = null;
+		double resultValue = 0;
 		for(Class c: classes.keySet()) {
-			double ClassProbabilty = classes.get(c) + c.getDocumentConditionalProbability(doc);
+			double classProbability = Math.log10(classes.get(c) + c.getDocumentConditionalProbability(doc)) / Math.log10(2.);
+			if(classProbability >= resultValue) {
+				resultValue = classProbability;
+				result = c;
+			}
 		}
-		
 		return result;
 	}
 	
