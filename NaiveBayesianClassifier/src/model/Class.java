@@ -19,7 +19,7 @@ public class Class {
 	public void train(List<Document> documents) {
 		documents.forEach(this::train);
 		for(String word: bagOfWords.keySet()) {
-			double conditionalProbability = ((double)(bagOfWords.get(word) + SMOOTHING)) /((double)(totalNumberOfWords + SMOOTHING * bc.getVocabularySize()));
+			double conditionalProbability = Math.log10(((double)(bagOfWords.get(word) + SMOOTHING)) /((double)(totalNumberOfWords + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
 			//System.out.println("Added : " + word + " " + conditionalProbability);
 			conditionalProbabilities.put(word, conditionalProbability );
 		}
@@ -46,7 +46,7 @@ public class Class {
 		double score = 1;
 		for(String word : doc.getWords()) {
 			score =  score + getWordConditionalProbability(word);
-			System.out.println("Score : " + score);
+			//System.out.println("Score : " + score);
 		}
 		return score;
 	}
