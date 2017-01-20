@@ -24,10 +24,11 @@ public class Class {
 			conditionalProbabilities.put(word, conditionalProbability );
 		}
 	}
+
 	public void train(Document document) {
 		document.getWords().forEach(this::putWordTrain);
 	}
-	
+
 	//Add a word
 	public void putWordTrain(String word) {
 		totalNumberOfWords++;
@@ -38,7 +39,7 @@ public class Class {
 		}
 //		System.out.println("bag of words get :  " + bagOfWords.get(word) + "total nr : " + totalNumberOfWords + " vocabsize " + bc.getVocabularySize());
 	}
-	
+
 	public double getDocumentConditionalProbability(Document doc) {
 		
 //		ConProbsString();
@@ -74,7 +75,7 @@ public class Class {
 	
 	@Override
 	public int hashCode() {
-		int hash = 0;
+		int hash = 12;
 		for (int i = 0; i < name.length(); i++) {
 			hash = hash*31 + name.charAt(i);
 		}

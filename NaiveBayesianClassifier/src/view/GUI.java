@@ -2,6 +2,8 @@ package view;
 
 import controller.Controller;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -10,6 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Class;
 import model.Document;
@@ -18,10 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GUIView extends Application {
+public class GUI extends Application {
 
     private static final String STANDARDTEXT = "class name";
     private static final String CLASSLISTSTART = "Classes in the system:";
+    private static final String CLASSIFYTEXT = "file to classify";
+    private static final String SELECTTEXT = "select";
     private Controller controller;
     private FileChooser fileChooser;
     private List<Document> inputDocuments;
@@ -33,15 +38,12 @@ public class GUIView extends Application {
     private Button train;
     private Button classify;
     private Text result;
-    
-    public static void main(String[] args) {
-    	launch(args);
-    }
+    private boolean classifying;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         controller = new Controller();
         fileChooser = new FileChooser();
-        inputDocuments = new ArrayList<>();
         BorderPane pane = new BorderPane();
         VBox left = new VBox();
         right = new VBox();
@@ -52,6 +54,7 @@ public class GUIView extends Application {
         train = new Button();
         classify = new Button();
         result = new Text();
+        classifying = false;
 
         fileInput.setText("select");
         addInput.setText("add");
@@ -60,6 +63,9 @@ public class GUIView extends Application {
 
         pane.setLeft(left);
         pane.setRight(right);
+
+        right.setAlignment(Pos.CENTER);
+        right.setPadding(new Insets(40));
 
         left.getChildren().add(classList);
         right.getChildren().add(className);
@@ -85,59 +91,81 @@ public class GUIView extends Application {
                 controller.addClassWithDocs(new Class(className.getText(), controller.getBaysianClassifier()), inputDocuments);
                 setSelectState();
             } else {
-                showPopup("Please select a classname");
+                showPopup("Please select a classname", primaryStage);
             }
         });
 
         train.setOnAction(event -> {
             controller.train();
-            setSelectState();
+            setClassifyState();
         });
 
         classify.setOnAction(event -> {
-        	System.out.println(inputDocuments.size());
             if (inputDocuments.size() == 1) {
-            	Document documentToClassify = inputDocuments.get(0);
-                Class resultClass = controller.classify(documentToClassify);
-                showResult(resultClass);
+                Class resultClass = controller.classify(inputDocuments.get(0));
+                showResult(resultClass, primaryStage);
             } else {
-                showPopup("Please only select one file to Classify");
+                showPopup("Please only select one file to Classify", primaryStage);
             }
         });
-
-        Scene scene = new Scene(pane);
+        Scene scene = new Scene(pane, 343, 150);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void showPopup(String s) {
-        //TODO stud
-    }
+    private void showPopup(String s, Stage primaryStage) {
+        Stage dialog = new Stage();
+        VBox dialogVbox = new VBox();
 
-    private void showResult(Class resultClass) {
-        result.setText(resultClass.toString());
-    }
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initOwner(primaryStage);
 
-    private void setAddedState() {
-        setInvisRight();
-        addInput.setVisible(true);
-        className.setVisible(true);
-        displayTrainClassify();
-        updateClassList();
+        dialogVbox.getChildren().add(new Text(s));
+
+        Scene dialogScene = new Scene(dialogVbox, 150, 100);
+        dialog.setScene(dialogScene);
+        dialog.show();
     }
 
     private void setSelectState() {
         setInvisRight();
         fileInput.setVisible(true);
+        fileInput.setText(SELECTTEXT);
+        className.setText(STANDARDTEXT);
         displayTrainClassify();
         updateClassList();
     }
 
+    private void setAddedState() {
+        if (!classifying) {
+            setInvisRight();
+            addInput.setVisible(true);
+            className.setVisible(true);
+            displayTrainClassify();
+            updateClassList();
+        } else {
+            displayTrainClassify();
+        }
+    }
+
+    private void setClassifyState() {
+        setInvisRight();
+        fileInput.setVisible(true);
+        fileInput.setText(CLASSIFYTEXT);
+        displayTrainClassify();
+        classifying = true;
+        updateClassList();
+    }
+
+    private void showResult(Class resultClass, Stage primaryStage) {
+        showPopup(resultClass.toString(), primaryStage);
+    }
+
     private void displayTrainClassify() {
-        if (controller.canTrain() && !addInput.isVisible()) {
+        if (controller.canTrain() && !controller.canClassify() && !className.isVisible()) {
             train.setVisible(true);
         }
-        if (controller.canClassify() && !fileInput.isVisible()) {
+        if (controller.canClassify() && classifying) {
             classify.setVisible(true);
         }
     }

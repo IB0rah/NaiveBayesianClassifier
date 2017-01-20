@@ -12,17 +12,20 @@ public class Document {
     //List of all words  in the document
     public List<String> words = new ArrayList<>();
 
-    public Document(File file){
+    public Document(List<String> words) {
+        this.words = words;
+    }
+
+    public Document(File file) {
         List<String> fileWords = new ArrayList<>();
-        Scanner in;
-		try {
-			in = new Scanner(new FileReader(file));
-			while (in.hasNext()) fileWords.add(in.next());
-			words = DocumentUtils.tokenize(fileWords);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        Scanner in = null;
+        try {
+            in = new Scanner(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        while (in.hasNext()) fileWords.add(in.next());
+        words = DocumentUtils.tokenize(fileWords);
     }
 
     public List<String> getWords() {

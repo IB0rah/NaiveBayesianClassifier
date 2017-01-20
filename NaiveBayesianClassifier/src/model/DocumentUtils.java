@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DocumentUtils {
-    private static List<String> stopwords = Arrays.asList( "a",
+    private static List<String> stopwords = Arrays.asList("a",
             "able",
             "about",
             "above",
@@ -684,4 +684,5 @@ public class DocumentUtils {
 
         return result;
     }
+
 }

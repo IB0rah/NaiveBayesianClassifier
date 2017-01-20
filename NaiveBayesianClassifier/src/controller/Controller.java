@@ -21,7 +21,6 @@ public class Controller {
     }
 
     public void addClassWithDocs(Class aClass, List<Document> documents) {
-        if (classAndDocs.size() > 0) System.out.println(aClass.equals(classAndDocs.keySet().toArray()[0]));
         if (classAndDocs.containsKey(aClass)) {
             List<Document> docs = classAndDocs.get(aClass);
             docs.addAll(documents);
@@ -49,8 +48,8 @@ public class Controller {
         return baysianClassifier;
     }
 
+
     public Class classify(Document doc) {
-        
         return baysianClassifier.classify(doc);
     }
 

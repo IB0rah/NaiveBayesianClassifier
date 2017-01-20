@@ -74,12 +74,10 @@ public class BayesianClassifier {
 		double oldClassPrior = classes.get(c);
 		double oldNrOfDocumentsClass = oldClassPrior * documentCount;
 		documentCount++;
-		for(String word: document.getWords()) {
-			if(!vocabulary.contains(word)) {
-				vocabulary.add(word);
-			}
-		}
-		classes.put(c, ((double)oldNrOfDocumentsClass + 1) / documentCount);
+		document.getWords().stream().filter(word -> !vocabulary.contains(word)).forEach(word -> {
+			vocabulary.add(word);
+		});
+		classes.put(c, oldNrOfDocumentsClass + 1 / documentCount);
 		c.train(document);
 		
 	}
