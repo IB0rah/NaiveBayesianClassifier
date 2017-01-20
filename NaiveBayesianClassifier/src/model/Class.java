@@ -41,9 +41,9 @@ public class Class {
 	
 	public double getDocumentConditionalProbability(Document doc) {
 		
-		ConProbsString();
-		System.out.println(" Hoe dan");
-		double score = 1;
+//		ConProbsString();
+//		System.out.println(" Hoe dan");
+		double score = 0;
 		for(String word : doc.getWords()) {
 			score =  score + getWordConditionalProbability(word);
 			//System.out.println("Score : " + score);

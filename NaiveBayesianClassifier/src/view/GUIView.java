@@ -33,7 +33,10 @@ public class GUIView extends Application {
     private Button train;
     private Button classify;
     private Text result;
-
+    
+    public static void main(String[] args) {
+    	launch(args);
+    }
     @Override
     public void start(Stage primaryStage) throws Exception {
         controller = new Controller();

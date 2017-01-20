@@ -676,9 +676,9 @@ public class DocumentUtils {
     public static List<String> tokenize(List<String> strings) {
         List<String> result = new ArrayList<>();
         for (String word : strings) {
-            String lowercased = word.toLowerCase();
-            if (!stopwords.contains(lowercased)) {
-                result.add(lowercased);
+            String normalized = word.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+            if (!stopwords.contains(normalized)) {
+                result.add(normalized);
             }
         }
 

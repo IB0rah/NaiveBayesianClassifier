@@ -58,9 +58,9 @@ public class BayesianClassifier {
 		for(Class c: classes.keySet()) {
 			System.out.println("prior : " + classes.get(c) + c.getName());
 			System.out.println("Conditional probability: " + c.getDocumentConditionalProbability(doc));
-			double classProbability = Math.pow(10, classes.get(c) + c.getDocumentConditionalProbability(doc));
+			double classProbability = classes.get(c) + c.getDocumentConditionalProbability(doc);
 //			System.out.println(c.toString() + " " + classProbability );
-			System.out.println(classProbability >= resultValue);
+			System.out.println(c.toString() + " Probability : " + classProbability);
 			if(classProbability >= resultValue) {
 				resultValue = classProbability;
 				result = c;
