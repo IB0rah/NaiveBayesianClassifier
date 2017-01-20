@@ -1,4 +1,3 @@
-//<<<<<<< HEAD
 ////package view;
 ////
 ////import controller.Controller;
@@ -150,7 +149,6 @@
 ////        ((VBox) border.getRight()).getChildren().remove(slt);
 ////    }
 ////}
-//=======
 //package view;
 //
 //import controller.Controller;
@@ -245,9 +243,9 @@
 //        });
 //
 //        classify.setOnAction(event -> {
-//        	System.out.println(inputDocuments.size());
+//            System.out.println(inputDocuments.size());
 //            if (inputDocuments.size() == 1) {
-//            	Document documentToClassify = inputDocuments.get(0);
+//                Document documentToClassify = inputDocuments.get(0);
 //                Class resultClass = controller.classify(documentToClassify);
 //                showResult(resultClass);
 //            } else {
@@ -308,4 +306,3 @@
 //        classList.setText(list);
 //    }
 //}
-//>>>>>>> a8c54d7c91bbbad780e326f52dfe767b5d2ad8e5
