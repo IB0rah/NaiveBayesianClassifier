@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -673,15 +674,23 @@ public class DocumentUtils {
             "z",
             "zero");
 
-    public static List<String> tokenize(List<String> strings) {
-        List<String> result = new ArrayList<>();
+    public static Set<String> tokenize(Set<String> strings) {
+        	Set<String> result = new HashSet<>();
+        	//result.addAll(strings);
         for (String word : strings) {
             String normalized = word.replaceAll("[^a-zA-Z ]", "").toLowerCase();
             if (!stopwords.contains(normalized)) {
                 result.add(normalized);
             }
         }
-
+        
+        Set<String> resultcopy = new HashSet<String>();
+        resultcopy.addAll(result);
+        for(String word: resultcopy) {
+        	if(Collections.frequency(resultcopy, word) > 1) {
+        		result.remove(word);
+        	}
+        }
         return result;
     }
 

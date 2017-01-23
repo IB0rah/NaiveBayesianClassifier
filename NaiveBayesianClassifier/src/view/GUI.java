@@ -1,6 +1,7 @@
 package view;
 
 import controller.Controller;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,7 +19,9 @@ import model.Class;
 import model.Document;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GUI extends Application {
@@ -29,7 +32,7 @@ public class GUI extends Application {
     private static final String SELECTTEXT = "select";
     private Controller controller;
     private FileChooser fileChooser;
-    private List<Document> inputDocuments;
+    private Set<Document> inputDocuments;
     private VBox right;
     private TextField className;
     private Text classList;
@@ -39,7 +42,11 @@ public class GUI extends Application {
     private Button classify;
     private Text result;
     private boolean classifying;
-
+    private Class resultClass;
+    
+    public static void main(String[] args) {
+    	launch(args);
+    }
     @Override
     public void start(Stage primaryStage) throws Exception {
         controller = new Controller();
@@ -80,7 +87,7 @@ public class GUI extends Application {
 
         fileInput.setOnAction(event -> {
             System.out.println("fileInput");
-            inputDocuments = new ArrayList<>();
+            inputDocuments = new HashSet<>();
             inputDocuments.addAll(fileChooser.showOpenMultipleDialog(primaryStage).stream().map(Document::new).collect(Collectors.toList()));
             setAddedState();
         });
@@ -102,13 +109,13 @@ public class GUI extends Application {
 
         classify.setOnAction(event -> {
             if (inputDocuments.size() == 1) {
-                Class resultClass = controller.classify(inputDocuments.get(0));
+                resultClass = controller.classify(new ArrayList<>(inputDocuments).get(0));
                 showResult(resultClass, primaryStage);
             } else {
                 showPopup("Please only select one file to Classify", primaryStage);
             }
         });
-        Scene scene = new Scene(pane, 343, 150);
+        Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -116,13 +123,13 @@ public class GUI extends Application {
     private void showPopup(String s, Stage primaryStage) {
         Stage dialog = new Stage();
         VBox dialogVbox = new VBox();
+        dialogVbox.setAlignment(Pos.CENTER);
 
-        dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(primaryStage);
-
+        dialog.initModality(Modality.APPLICATION_MODAL);
         dialogVbox.getChildren().add(new Text(s));
 
-        Scene dialogScene = new Scene(dialogVbox, 150, 100);
+        Scene dialogScene = new Scene(dialogVbox);
         dialog.setScene(dialogScene);
         dialog.show();
     }
@@ -158,7 +165,39 @@ public class GUI extends Application {
     }
 
     private void showResult(Class resultClass, Stage primaryStage) {
-        showPopup(resultClass.toString(), primaryStage);
+        Stage dialog = new Stage();
+        VBox dialogVbox = new VBox();
+        dialogVbox.setAlignment(Pos.CENTER);
+        dialogVbox.setPadding(new Insets(15));
+
+        Button btnAcceptClassification = new Button();
+        Button btnDenyClassification = new Button();
+
+        btnAcceptClassification.setText("Correct");
+        btnDenyClassification.setText("Choose another class");
+
+        dialogVbox.getChildren().addAll(btnAcceptClassification, btnDenyClassification);
+
+        btnAcceptClassification.setOnAction(event -> {
+            controller.getBaysianClassifier().train(new ArrayList<>(inputDocuments).get(0), resultClass);
+        });
+
+        btnDenyClassification.setOnAction(event -> {
+            dialogVbox.getChildren().clear();
+            for (Class c : controller.getClassAndDocs().keySet()) {
+                Button btn = new Button();
+                btn.setText(c.toString());
+                btn.setOnAction( event1 -> {
+                    controller.getBaysianClassifier().train(new ArrayList<>(inputDocuments).get(0), c);
+                });
+                dialogVbox.getChildren().add(btn);
+            }
+        });
+        dialog.initOwner(primaryStage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        Scene dialogScene = new Scene(dialogVbox);
+        dialog.setScene(dialogScene);
+        dialog.show();
     }
 
     private void displayTrainClassify() {

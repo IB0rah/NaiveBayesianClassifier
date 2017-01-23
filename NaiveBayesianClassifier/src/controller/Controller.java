@@ -7,11 +7,12 @@ import model.Document;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Controller {
 
     BayesianClassifier baysianClassifier;
-    Map<Class, List<Document>> classAndDocs;
+    Map<Class, Set<Document>> classAndDocs;
     private boolean isTrained;
 
     public Controller() {
@@ -20,9 +21,9 @@ public class Controller {
         isTrained = false;
     }
 
-    public void addClassWithDocs(Class aClass, List<Document> documents) {
+    public void addClassWithDocs(Class aClass, Set<Document> documents) {
         if (classAndDocs.containsKey(aClass)) {
-            List<Document> docs = classAndDocs.get(aClass);
+            Set<Document> docs = classAndDocs.get(aClass);
             docs.addAll(documents);
             classAndDocs.put(aClass, docs);
         } else {
@@ -53,7 +54,7 @@ public class Controller {
         return baysianClassifier.classify(doc);
     }
 
-    public Map<Class, List<Document>> getClassAndDocs() {
+    public Map<Class, Set<Document>> getClassAndDocs() {
         return classAndDocs;
     }
 }

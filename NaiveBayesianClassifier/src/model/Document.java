@@ -6,18 +6,19 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.*;
 
 public class Document {
 
     //List of all words  in the document
-    public List<String> words = new ArrayList<>();
+    public Set<String> words = new HashSet<>();
 
-    public Document(List<String> words) {
+    public Document(Set<String> words) {
         this.words = words;
     }
 
     public Document(File file) {
-        List<String> fileWords = new ArrayList<>();
+        Set<String> fileWords = new HashSet<>();
         Scanner in = null;
         try {
             in = new Scanner(new FileReader(file));
@@ -28,7 +29,7 @@ public class Document {
         words = DocumentUtils.tokenize(fileWords);
     }
 
-    public List<String> getWords() {
+    public Set<String> getWords() {
         return words;
     }
 
