@@ -15,6 +15,10 @@ public class BayesianClassifier {
 		return vocabulary.size();
 	}
 	
+	public Map<Class, Double> getClasses() {
+		return classes;
+	}
+	
 	public void train(Map<Class, Set<Document>> trainingsData) {
 		this.vocabulary = extractVocabulary(trainingsData);
 		this.documentCount = CountNumberOfDocs(trainingsData);
@@ -57,20 +61,48 @@ public class BayesianClassifier {
 	
 	public double ChiSquaredValue(String word) {
 		double result = 0;
-		int TotalNrOfDocsContainingWord = totalAmountOfDocs(word);
-		int TotalNrOfDocsNotContainingWords = documentCount - TotalNrOfDocsContainingWord;
+		double[][] chiSquareTable = new double[2 + 1][classes.keySet().size() + 1];
+		int i = 0;
 		for(Class c: classes.keySet()) {
-			double MContaining = 0;
+			
 			if(c.getDocumentListWord(word) != null) {
-				 MContaining = c.getDocumentListWord(word).keySet().size();
+				chiSquareTable[0][i] = c.getDocumentListWord(word).size();
+			} else {
+				chiSquareTable[0][i] = 0;
 			}
-			double MNotContaining = c.getTotalNrOfDocs() - MContaining;
-			double ExpContaining = (((double)(TotalNrOfDocsContainingWord * c.getTotalNrOfDocs())) / (double)documentCount); 
-			double ExpNotContaining = (((double)(TotalNrOfDocsNotContainingWords * c.getTotalNrOfDocs())) / (double)documentCount ); 
-			double ChiSquaredValueContaining = ((double)Math.pow((MContaining - ExpContaining), 2)) / ExpContaining;
-			double ChiSquaredValueNotContaining = ((double)Math.pow((MNotContaining - ExpNotContaining), 2)) / ExpNotContaining;
-			result = result + ChiSquaredValueContaining + ChiSquaredValueNotContaining;
+			chiSquareTable[1][i] = c.getTotalNrOfDocs() - chiSquareTable[0][i];
+			chiSquareTable[2][i] = c.getTotalNrOfDocs();
+			i++;
 		}
+		
+		double totalValueRow1 = 0;
+		double totalValueRow2 = 0;
+		double totalValueRow3 = 0;
+		
+		for(i = 0; i < classes.keySet().size(); i++) {
+			totalValueRow1 += chiSquareTable[0][i];
+			totalValueRow2 += chiSquareTable[1][i];
+			totalValueRow3 += chiSquareTable[2][i];
+		}
+		chiSquareTable[0][classes.keySet().size()] = totalValueRow1;
+		chiSquareTable[1][classes.keySet().size()] = totalValueRow2;
+		chiSquareTable[2][classes.keySet().size()] = totalValueRow3;
+		
+		for(i = 0; i < 3; i++) {
+			for(int j = 0; j < classes.keySet().size(); j++) {
+				double expected = chiSquareTable[i][classes.keySet().size()] * chiSquareTable[2][j] / chiSquareTable[2][classes.keySet().size()]; 
+				result += Math.pow(chiSquareTable[i][j] - expected, 2) / expected;
+			}
+		}
+		
+		System.out.println("Word : " + word + " \n" + "Chi2: " + result);
+		for(i = 0; i < 3; i++) {
+			for(int j = 0; j < classes.keySet().size(); j++) {
+				System.out.println(i + ", " + j + "value : " + chiSquareTable[i][j]);
+			}
+		}
+		
+		//System.out.println("word : " + word +  "Chi squared value : " + result);
 		return result;
 	}
 	
@@ -98,7 +130,7 @@ public class BayesianClassifier {
 				result = c;
 			}
 		}
-		System.out.println("Classified as: " + result.getName());
+		//System.out.println("Classified as: " + result.getName());
 		return result;
 	}
 	
@@ -118,5 +150,8 @@ public class BayesianClassifier {
 		Set<Document> documentAsList = new HashSet<Document>();
 		documentAsList.add(document);
 		c.train(documentAsList);
+		for(Class cl: classes.keySet()) {
+			cl.chiSquareFeatureSelection(300);
+		}
 	}
 }

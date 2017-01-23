@@ -11,6 +11,7 @@ public class Class {
 	private int totalNumberOfDocs = 0;
 	private BayesianClassifier bc;
 	private String name;
+	private int nrOfFeatures = 300;
 	
 	public Class(String name, BayesianClassifier classifier) {
 		this.name = name;
@@ -23,21 +24,27 @@ public class Class {
 			double chiSquaredValue = bc.ChiSquaredValue(word);
 			chisquarevalues.put(word, chiSquaredValue);
 		}
+		//System.out.println("Chi squared values size : " + chisquarevalues.keySet().size());
 		Set<String> highestXChis = new HashSet<String>();
-		for (int i = 0; i < nrOfFeatures; i++) {
-			String maxWord = chisquarevalues.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
-			highestXChis.add(maxWord);
-			chisquarevalues.remove(maxWord);
+		if(chisquarevalues.size() <= this.nrOfFeatures) {
+			highestXChis.addAll(chisquarevalues.keySet());
+		} else {
+			for (int i = 0; i < nrOfFeatures; i++) {
+				String maxWord = chisquarevalues.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
+				highestXChis.add(maxWord);
+				chisquarevalues.remove(maxWord);
+			}
 		}
 		
-		Map<String, Map<Document, Integer>> bagOfWordsCopy = new HashMap<String, Map<Document, Integer>>();
-		bagOfWordsCopy.putAll(bagOfWords);
-		for(String word: bagOfWordsCopy.keySet()) {
+		//System.out.println("highestXChis size : " + highestXChis.size());
+		Map<String, Double> conProbsCopy = new HashMap<String, Double>();
+		conProbsCopy.putAll(conditionalProbabilities);
+		for(String word: conProbsCopy.keySet()) {
 			if(!highestXChis.contains(word)) {
-				bagOfWords.remove(word);
 				conditionalProbabilities.remove(word);
 			}
 		}
+		//ConProbsString();
 	}
 	public void train(Set<Document> documents) {
 		documents.forEach(this::train);
@@ -47,7 +54,7 @@ public class Class {
 			conditionalProbabilities.put(word, conditionalProbability );
 		}
 		//chiSquareFeatureSelection(300);
-		System.out.println("BagOfWords size : " + bagOfWords.size() + "conProbs Size : " + conditionalProbabilities.size() + " Total nr of words : " + totalNumberOfWords);
+		//System.out.println("BagOfWords size : " + bagOfWords.size() + "conProbs Size : " + conditionalProbabilities.size() + " Total nr of words : " + totalNumberOfWords);
 	}
 	
 	public Map<Document, Integer> getDocumentListWord(String word) {
@@ -145,7 +152,7 @@ public class Class {
 	public String ConProbsString() {
 		String result = "";
 		for(String word: conditionalProbabilities.keySet()) {
-			//System.out.println(word + "prob: " + conditionalProbabilities.get(word));
+			System.out.println(word + "prob: " + conditionalProbabilities.get(word));
 		}
 		return result;
 	}
