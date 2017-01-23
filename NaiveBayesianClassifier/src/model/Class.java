@@ -11,7 +11,7 @@ public class Class {
 	private int totalNumberOfDocs = 0;
 	private BayesianClassifier bc;
 	private String name;
-	private int nrOfFeatures = 300;
+	private int nrOfFeatures = 1;
 	
 	public Class(String name, BayesianClassifier classifier) {
 		this.name = name;
@@ -44,7 +44,8 @@ public class Class {
 				conditionalProbabilities.remove(word);
 			}
 		}
-		//ConProbsString();
+		System.out.println(" FOR THIS CLASS PROB TABLE : " + this.toString());
+		ConProbsString();
 	}
 	public void train(Set<Document> documents) {
 		documents.forEach(this::train);

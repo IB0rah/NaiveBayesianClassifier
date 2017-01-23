@@ -28,7 +28,7 @@ public class BayesianClassifier {
 			c.train(trainingsData.get(c));
 		}
 		for(Class c: classes.keySet()) {
-			c.chiSquareFeatureSelection(300);
+			c.chiSquareFeatureSelection(1);
 		}
 		System.out.println("Done training");
 	}
@@ -90,8 +90,11 @@ public class BayesianClassifier {
 		
 		for(i = 0; i < 3; i++) {
 			for(int j = 0; j < classes.keySet().size(); j++) {
+				//System.out.println(" DOING THIS CALCULATION : " + chiSquareTable[i][classes.keySet().size()] + " * " + chiSquareTable[2][j] + " / " + chiSquareTable[2][classes.keySet().size()] + "\n");
 				double expected = chiSquareTable[i][classes.keySet().size()] * chiSquareTable[2][j] / chiSquareTable[2][classes.keySet().size()]; 
+				//System.out.println("EXPECTED : " + expected);
 				result += Math.pow(chiSquareTable[i][j] - expected, 2) / expected;
+				//System.out.println(result);
 			}
 		}
 		
@@ -130,7 +133,7 @@ public class BayesianClassifier {
 				result = c;
 			}
 		}
-		//System.out.println("Classified as: " + result.getName());
+		System.out.println("Classified as: " + result.getName());
 		return result;
 	}
 	
