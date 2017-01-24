@@ -1,13 +1,13 @@
 package view;
 
 import controller.Controller;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -26,10 +26,16 @@ import java.util.stream.Collectors;
 
 public class GUI extends Application {
 
-    private static final String STANDARDTEXT = "class name";
+    private static final String CLASS = "class name";
+    private static final String CHI = "0";
     private static final String CLASSLISTSTART = "Classes in the system:";
     private static final String CLASSIFYTEXT = "file to classify";
-    private static final String SELECTTEXT = "select";
+    private static final String SELECTTEXT = "file(s) for training";
+    private static final String CHIINSTRUCTION = "Set A Chi Value";
+    private static final String TRAINISTRUCTION = "Select Files Per Class";
+    private static final String CLASSIFYINSTRUCTION = "Select A File To Classify";
+    private static final String ADDINSTRUCTION = "Name of Class for selected file(s):";
+    private Label instruction;
     private Controller controller;
     private FileChooser fileChooser;
     private Set<Document> inputDocuments;
@@ -40,17 +46,18 @@ public class GUI extends Application {
     private Button addInput;
     private Button train;
     private Button classify;
-    private Text result;
+    private TextField ChiValue;
+    private Button ChiSet;
     private boolean classifying;
     private Class resultClass;
-    
-    public static void main(String[] args) {
-    	launch(args);
-    }
+    private ProgressIndicator pi;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         controller = new Controller();
         fileChooser = new FileChooser();
+        ChiValue = new TextField();
+        ChiSet = new Button();
         BorderPane pane = new BorderPane();
         VBox left = new VBox();
         right = new VBox();
@@ -60,13 +67,15 @@ public class GUI extends Application {
         addInput = new Button();
         train = new Button();
         classify = new Button();
-        result = new Text();
         classifying = false;
+        instruction = new Label();
+        pi = new ProgressIndicator(-1);
 
-        fileInput.setText("select");
+        fileInput.setText("Training Files");
         addInput.setText("add");
         train.setText("train");
         classify.setText("classify");
+        ChiSet.setText("Set Chi value");
 
         pane.setLeft(left);
         pane.setRight(right);
@@ -75,19 +84,24 @@ public class GUI extends Application {
         right.setPadding(new Insets(40));
 
         left.getChildren().add(classList);
-        right.getChildren().add(className);
-        right.getChildren().add(fileInput);
-        right.getChildren().add(addInput);
-        right.getChildren().add(train);
-        right.getChildren().add(classify);
-        right.getChildren().add(result);
 
-        setSelectState();
+        setInitState();
         updateClassList();
+
+        ChiSet.setOnAction(event -> {
+            if (validChi()) {
+                controller.setChi(Integer.parseInt(ChiValue.getText().trim()));
+                setSelectState();
+            } else {
+                showPopup("Please insert a numeric value", primaryStage);
+            }
+        });
 
         fileInput.setOnAction(event -> {
             System.out.println("fileInput");
             inputDocuments = new HashSet<>();
+            fileInput.setDisable(true);
+            right.getChildren().add(pi);
             inputDocuments.addAll(fileChooser.showOpenMultipleDialog(primaryStage).stream().map(Document::new).collect(Collectors.toList()));
             setAddedState();
         });
@@ -103,13 +117,17 @@ public class GUI extends Application {
         });
 
         train.setOnAction(event -> {
+            train.setDisable(true);
+            right.getChildren().add(pi);
             controller.train();
             setClassifyState();
         });
 
         classify.setOnAction(event -> {
             if (inputDocuments.size() == 1) {
-                resultClass = controller.classify(new ArrayList<>(inputDocuments).get(0));
+            	ArrayList<Document> documentsAsList = new ArrayList<Document>();
+            	documentsAsList.addAll(inputDocuments);
+                resultClass = controller.classify(documentsAsList.get(0));
                 showResult(resultClass, primaryStage);
             } else {
                 showPopup("Please only select one file to Classify", primaryStage);
@@ -118,6 +136,18 @@ public class GUI extends Application {
         Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private boolean validChi() {
+        return ChiValue.getText().trim().matches("\\d+") && !ChiValue.getText().trim().equals(CHI);
+    }
+
+    private void setInitState() {
+        setInvisRight();
+        instruction.setText(CHIINSTRUCTION);
+        right.getChildren().add(instruction);
+        right.getChildren().add(ChiValue);
+        right.getChildren().add(ChiSet);
     }
 
     private void showPopup(String s, Stage primaryStage) {
@@ -136,9 +166,11 @@ public class GUI extends Application {
 
     private void setSelectState() {
         setInvisRight();
-        fileInput.setVisible(true);
+        instruction.setText(TRAINISTRUCTION);
+        right.getChildren().add(instruction);
+        right.getChildren().add(fileInput);
         fileInput.setText(SELECTTEXT);
-        className.setText(STANDARDTEXT);
+        className.setText(CLASS);
         displayTrainClassify();
         updateClassList();
     }
@@ -146,18 +178,23 @@ public class GUI extends Application {
     private void setAddedState() {
         if (!classifying) {
             setInvisRight();
-            addInput.setVisible(true);
-            className.setVisible(true);
+            instruction.setText(ADDINSTRUCTION);
+            right.getChildren().add(instruction);
+            right.getChildren().add(className);
+            right.getChildren().add(addInput);
             displayTrainClassify();
             updateClassList();
         } else {
+            fileInput.setDisable(false);
             displayTrainClassify();
         }
     }
 
     private void setClassifyState() {
         setInvisRight();
-        fileInput.setVisible(true);
+        instruction.setText(CLASSIFYINSTRUCTION);
+        right.getChildren().add(instruction);
+        right.getChildren().add(fileInput);
         fileInput.setText(CLASSIFYTEXT);
         displayTrainClassify();
         classifying = true;
@@ -170,16 +207,22 @@ public class GUI extends Application {
         dialogVbox.setAlignment(Pos.CENTER);
         dialogVbox.setPadding(new Insets(15));
 
+        Label result = new Label();
+        result.setText(resultClass.toString());
+
         Button btnAcceptClassification = new Button();
         Button btnDenyClassification = new Button();
 
         btnAcceptClassification.setText("Correct");
         btnDenyClassification.setText("Choose another class");
 
-        dialogVbox.getChildren().addAll(btnAcceptClassification, btnDenyClassification);
+        dialogVbox.getChildren().addAll(result, btnAcceptClassification, btnDenyClassification);
 
         btnAcceptClassification.setOnAction(event -> {
-            controller.getBaysianClassifier().train(new ArrayList<>(inputDocuments).get(0), resultClass);
+        	ArrayList<Document> documentsAsList = new ArrayList<Document>();
+        	documentsAsList.addAll(inputDocuments);
+            controller.getBaysianClassifier().train(documentsAsList.get(0), resultClass);
+            dialog.close();
         });
 
         btnDenyClassification.setOnAction(event -> {
@@ -188,9 +231,13 @@ public class GUI extends Application {
                 Button btn = new Button();
                 btn.setText(c.toString());
                 btn.setOnAction( event1 -> {
-                    controller.getBaysianClassifier().train(new ArrayList<>(inputDocuments).get(0), c);
+                	ArrayList<Document> documentsAsList = new ArrayList<Document>();
+                	documentsAsList.addAll(inputDocuments);
+                    controller.getBaysianClassifier().train(documentsAsList.get(0), c);
+                    dialog.close();
                 });
                 dialogVbox.getChildren().add(btn);
+
             }
         });
         dialog.initOwner(primaryStage);
@@ -201,20 +248,23 @@ public class GUI extends Application {
     }
 
     private void displayTrainClassify() {
-        if (controller.canTrain() && !controller.canClassify() && !className.isVisible()) {
-            train.setVisible(true);
+        if (controller.canTrain() && !controller.canClassify()) {
+            right.getChildren().add(train);
         }
         if (controller.canClassify() && classifying) {
-            classify.setVisible(true);
+            right.getChildren().add(classify);
         }
     }
 
     private void setInvisRight() {
-        for (Node n : right.getChildren()) n.setVisible(false);
+        right.getChildren().clear();
+        fileInput.setDisable(false);
+        train.setDisable(false);
+        classify.setDisable(false);
     }
 
     private boolean validClass() {
-        return !className.getText().equals(STANDARDTEXT) && !className.getText().equals("");
+        return !className.getText().equals(CLASS) && !className.getText().equals("");
     }
 
     private void updateClassList() {

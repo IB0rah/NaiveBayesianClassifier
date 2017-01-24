@@ -11,25 +11,26 @@ import java.util.*;
 public class Document {
 
     //List of all words  in the document
-    public Set<String> words = new HashSet<>();
+    public List<String> words = new ArrayList<>();
 
-    public Document(Set<String> words) {
+    public Document(List<String> words) {
         this.words = words;
     }
 
     public Document(File file) {
-        Set<String> fileWords = new HashSet<>();
+        List<String> fileWords = new ArrayList<>();
         Scanner in = null;
         try {
             in = new Scanner(new FileReader(file));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+       
         while (in.hasNext()) fileWords.add(in.next());
         words = DocumentUtils.tokenize(fileWords);
     }
 
-    public Set<String> getWords() {
+    public List<String> getWords() {
         return words;
     }
 

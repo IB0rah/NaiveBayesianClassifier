@@ -20,7 +20,10 @@ public class Controller {
         classAndDocs = new HashMap<>();
         isTrained = false;
     }
-
+    
+    public void setChi(int amount) {
+    	
+    }
     public void addClassWithDocs(Class aClass, Set<Document> documents) {
         if (classAndDocs.containsKey(aClass)) {
             Set<Document> docs = classAndDocs.get(aClass);

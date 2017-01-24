@@ -20,16 +20,30 @@ public class BayesianClassifier {
 	}
 	
 	public void train(Map<Class, Set<Document>> trainingsData) {
-		this.vocabulary = extractVocabulary(trainingsData);
+		//this.vocabulary = extractVocabulary(trainingsData);
 		this.documentCount = CountNumberOfDocs(trainingsData);
 		for(Class c: trainingsData.keySet()) {
 			double classPrior = Math.log10(((double)trainingsData.get(c).size()) / ((double)documentCount)) / Math.log10(2.);
 			classes.put(c, classPrior);
 			c.train(trainingsData.get(c));
+			System.out.println("CLASS PRIOR : " + c.getName() + " : " + classes.get(c));
+		}
+//		for(Class c : classes.keySet()) {
+//			System.out.println(c.getName() + " : " + c.getConProbs().keySet().size() + " \n");
+//		}
+		for(Class c: classes.keySet()) {
+			this.vocabulary.addAll(c.chiSquareFeatureSelection(1000));
+//			System.out.println("VOCAB SIZE : " + vocabulary.size());
+			for(String w : vocabulary) {
+//				System.out.println("WORD : " + w);
+			}
 		}
 		for(Class c: classes.keySet()) {
-			c.chiSquareFeatureSelection(1);
+			c.updateConditionalProbabilities();
 		}
+//		for(Class c : classes.keySet()) {
+//			System.out.println(c.getName() + " : " + c.getConProbs().keySet().size());
+//		}
 		System.out.println("Done training");
 	}
 	
@@ -47,7 +61,7 @@ public class BayesianClassifier {
 		for(Class c: trainingsData.keySet()) {
 			Set<Document> documents = trainingsData.get(c);
 			for(Document doc: documents) {
-				Set<String> words = doc.getWords();
+				List<String> words = doc.getWords();
 				for(String w: words) {
 					if(!result.contains(w)) {
 						result.add(w);
@@ -98,14 +112,14 @@ public class BayesianClassifier {
 			}
 		}
 		
-		System.out.println("Word : " + word + " \n" + "Chi2: " + result);
-		for(i = 0; i < 3; i++) {
-			for(int j = 0; j < classes.keySet().size(); j++) {
-				System.out.println(i + ", " + j + "value : " + chiSquareTable[i][j]);
-			}
-		}
+//		System.out.println("Word : " + word + " \n" + "Chi2: " + result);
+//		for(i = 0; i < 3; i++) {
+//			for(int j = 0; j < classes.keySet().size(); j++) {
+//				System.out.println(i + ", " + j + "value : " + chiSquareTable[i][j]);
+//			}
+//		}
 		
-		//System.out.println("word : " + word +  "Chi squared value : " + result);
+//		System.out.println("word : " + word +  "Chi squared value : " + result);
 		return result;
 	}
 	
@@ -127,7 +141,7 @@ public class BayesianClassifier {
 //			System.out.println("Conditional probability: " + c.getDocumentConditionalProbability(doc));
 			double classProbability = classes.get(c) + c.getDocumentConditionalProbability(doc);
 //			System.out.println(c.toString() + " " + classProbability );
-//			System.out.println(c.toString() + " Probability : " + classProbability);
+			//System.out.println(c.toString() + " Probability : " + classProbability);
 			if(classProbability >= resultValue) {
 				resultValue = classProbability;
 				result = c;
@@ -153,8 +167,8 @@ public class BayesianClassifier {
 		Set<Document> documentAsList = new HashSet<Document>();
 		documentAsList.add(document);
 		c.train(documentAsList);
-		for(Class cl: classes.keySet()) {
-			cl.chiSquareFeatureSelection(300);
-		}
+//		for(Class cl: classes.keySet()) {
+//			cl.chiSquareFeatureSelection(300);
+//		}
 	}
 }

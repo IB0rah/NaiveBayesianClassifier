@@ -60,7 +60,7 @@ public class CompleteTest {
 			if(i < documentsClass2Test.size()) {
 				if(controller.getBaysianClassifier().classify(documentsClass2Test.get(i)).equals(class2Class)) {
 					correctlyClassifiedClass2++;
-					controller.getBaysianClassifier().train(documentsClass2Test.get(i), class2Class);
+					//controller.getBaysianClassifier().train(documentsClass2Test.get(i), class2Class);
 				}
 				
 				
@@ -69,7 +69,7 @@ public class CompleteTest {
 			if(i < documentsClass1Test.size()) {
 				if(controller.getBaysianClassifier().classify(documentsClass1Test.get(i)).equals(class1Class)) {
 					correctlyClassifiedClass1++;
-					controller.getBaysianClassifier().train(documentsClass1Test.get(i), class1Class);
+					//controller.getBaysianClassifier().train(documentsClass1Test.get(i), class1Class);
 				}
 				
 			}

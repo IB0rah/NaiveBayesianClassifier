@@ -1,5 +1,7 @@
 package model;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Class {
@@ -11,14 +13,21 @@ public class Class {
 	private int totalNumberOfDocs = 0;
 	private BayesianClassifier bc;
 	private String name;
-	private int nrOfFeatures = 1;
+	private int nrOfFeatures = 1000;
 	
 	public Class(String name, BayesianClassifier classifier) {
 		this.name = name;
 		this.bc = classifier;
 	}
 	
-	public void chiSquareFeatureSelection(int nrOfFeatures) {
+	public int getTotalNumberOfWords() {
+		int result = 0;
+		for(String w: bagOfWords.keySet()) {
+			result += getWordFreq(w);
+		}
+		return result;
+	}
+	public Set<String> chiSquareFeatureSelection(int nrOfFeatures) {
 		Map<String, Double> chisquarevalues = new HashMap<String, Double>();
 		for(String word : bagOfWords.keySet()) {
 			double chiSquaredValue = bc.ChiSquaredValue(word);
@@ -36,24 +45,40 @@ public class Class {
 			}
 		}
 		
-		//System.out.println("highestXChis size : " + highestXChis.size());
-		Map<String, Double> conProbsCopy = new HashMap<String, Double>();
-		conProbsCopy.putAll(conditionalProbabilities);
-		for(String word: conProbsCopy.keySet()) {
+		System.out.println("highestXChis size : " + highestXChis.size());
+		System.out.println("bagOfWordsSize : " + bagOfWords.size());
+		Map<String, Map<Document, Integer>> bagOfWordsCopy = new HashMap<String, Map<Document, Integer>>();
+		bagOfWordsCopy.putAll(bagOfWords);
+		for(String word: bagOfWordsCopy.keySet()) {
 			if(!highestXChis.contains(word)) {
+				bagOfWords.remove(word);
 				conditionalProbabilities.remove(word);
 			}
+			
 		}
-		System.out.println(" FOR THIS CLASS PROB TABLE : " + this.toString());
+		
+		try {
+			PrintWriter out = new PrintWriter("Features" + this.getName() + ".txt");
+			for(String s: conditionalProbabilities.keySet()) {
+				out.println(s + " \n");
+			}
+			out.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		ConProbsString();
+		return bagOfWords.keySet();
 	}
 	public void train(Set<Document> documents) {
-		documents.forEach(this::train);
-		for(String word: bagOfWords.keySet()) {
-			double conditionalProbability = Math.log10(((double)(getWordFreq(word) + SMOOTHING)) /((double)(totalNumberOfWords + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
-			//System.out.println("Added : " + word + " " + conditionalProbability);
-			conditionalProbabilities.put(word, conditionalProbability );
+		
+		int totalWordCount = 0;
+		for(Document d: documents) {
+			totalWordCount += d.getWords().size();
 		}
+		
+//		System.out.println("TOTAL WORD SIZE : " + totalWordCount);
+		documents.forEach(this::train);
+
 		//chiSquareFeatureSelection(300);
 		//System.out.println("BagOfWords size : " + bagOfWords.size() + "conProbs Size : " + conditionalProbabilities.size() + " Total nr of words : " + totalNumberOfWords);
 	}
@@ -64,6 +89,15 @@ public class Class {
 			result = bagOfWords.get(word);
 		}
 		return result;
+	}
+	
+	public void updateConditionalProbabilities() {
+		for(String word: bagOfWords.keySet()) {
+		double conditionalProbability = Math.log10(((double)(getWordFreq(word) + SMOOTHING)) /((double)(this.getTotalNumberOfWords() + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
+		System.out.println("CLASS : " + this.getName());
+		System.out.println("Added : " + word + " " + conditionalProbability);
+		conditionalProbabilities.put(word, conditionalProbability );
+	}
 	}
 	
 	public int getTotalNrOfDocs() {
@@ -80,6 +114,10 @@ public class Class {
 		
 	}
 	
+	public Map<String, Double> getConProbs() {
+		return this.conditionalProbabilities;
+	}
+	
 	public int getWordFreq(String word) {
 		int result = 0;
 		Map<Document, Integer> documentsList = bagOfWords.get(word);
@@ -88,7 +126,7 @@ public class Class {
 		}
 		return result;
 	}
-
+	
 	//Add a word
 	public void putWordTrain(String word, Document document) {
 		totalNumberOfWords++;
@@ -108,6 +146,7 @@ public class Class {
 		
 //		ConProbsString();
 //		System.out.println(" Hoe dan");
+//		System.out.println("Found the following feautres for class:" + this.getName() +   "\n" );
 		double score = 0;
 		for(String word : doc.getWords()) {
 			score =  score + getWordConditionalProbability(word);
@@ -119,10 +158,15 @@ public class Class {
 	public double getWordConditionalProbability(String word) {
 		double score;
 		//System.out.println("Is it in the table?" + conditionalProbabilities.containsKey(word));
+		//System.out.println("DIT IS DE GROOTTE VAN MIJ CONDITIONAL PROBABILITY TABLE : " + conditionalProbabilities.size() );
 		if(conditionalProbabilities.containsKey(word)) {
 			score = conditionalProbabilities.get(word);
+//			System.out.println(word + "\n" + score );
 		} else {
-			score = Math.log10(((double)(0 + SMOOTHING)) /((double)(totalNumberOfWords + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
+//			System.out.println("TOTAAL AANTAL WOORDEN : " + this.getTotalNumberOfWords());
+			score = Math.log10(((double)(0 + SMOOTHING)) /((double)(this.getTotalNumberOfWords() + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
+//			score = 0;
+//			System.out.println("VOOR " + this.getName() + " IS DIT DE SCORE ALS IE NIET VOORKOMT : " + score);
 		}
 		//System.out.println("Word score : " + score + " : " + word);
 		return score;

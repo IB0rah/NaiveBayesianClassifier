@@ -672,25 +672,26 @@ public class DocumentUtils {
             "yourselves",
             "you\'ve",
             "z",
+            "",
             "zero");
 
-    public static Set<String> tokenize(Set<String> strings) {
-        	Set<String> result = new HashSet<>();
+    public static List<String> tokenize(List<String> strings) {
+        	List<String> result = new ArrayList<>();
         	//result.addAll(strings);
         for (String word : strings) {
-            String normalized = word.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+            String normalized = word.replaceAll("[^a-zA-Z]", "").toLowerCase();
             if (!stopwords.contains(normalized)) {
                 result.add(normalized);
             }
-        }
+        } 
         
-        Set<String> resultcopy = new HashSet<String>();
-        resultcopy.addAll(result);
-        for(String word: resultcopy) {
-        	if(Collections.frequency(resultcopy, word) > 1) {
-        		result.remove(word);
-        	}
-        }
+//        Set<String> resultcopy = new HashSet<String>();
+//        resultcopy.addAll(result);
+//        for(String word: resultcopy) {
+//        	if(Collections.frequency(resultcopy, word) > 1) {
+//        		result.remove(word);
+//        	}
+//        }
         return result;
     }
 
