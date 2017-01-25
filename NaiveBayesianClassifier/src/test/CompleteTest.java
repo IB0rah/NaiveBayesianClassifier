@@ -10,10 +10,10 @@ import controller.Controller;
 public class CompleteTest {
 	public static void main(String[] args) {
 		Controller controller = new Controller();
-		File[] class1Train = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\ham").listFiles();
-		File[] class2Train = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spam").listFiles();
-//		File[] class1Train = new File("C:\\Users\\V\\Downloads\\blogs\\MaleTrain").listFiles();
-//		File[] class2Train = new File("C:\\Users\\V\\Downloads\\blogs\\FemaleTrain").listFiles();
+//		File[] class1Train = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\ham").listFiles();
+//		File[] class2Train = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spam").listFiles();
+		File[] class1Train = new File("C:\\Users\\Vincent\\Downloads\\blogs\\MaleTrain").listFiles();
+		File[] class2Train = new File("C:\\Users\\Vincent\\Downloads\\blogs\\FemaleTrain").listFiles();
 //		File[] class1Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\alt.atheism train").listFiles();
 //		File[] class2Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.graphics train").listFiles();
 //		File[] class3Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.os.ms-windows.misc train").listFiles();
@@ -34,12 +34,12 @@ public class CompleteTest {
 //		controller.addClassWithDocs(class3Class, documentsClass3);
 		controller.train();
 		System.out.println("Document count: " + controller.getBaysianClassifier().documentCount);
-		System.out.println("Vocabulary size: " + controller.getBaysianClassifier().getVocabularySize());
+		System.out.println("Vocabulary size: " + controller.getBaysianClassifier().getfeatureVocabularySize());
 		
-		File[] class1Test = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtest").listFiles();
-		File[] class2Test = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtest").listFiles();
-//		File[] class1Test = new File("C:\\Users\\V\\Downloads\\blogs\\MaleTest").listFiles();
-//		File[] class2Test = new File("C:\\Users\\V\\Downloads\\blogs\\FemaleTest").listFiles();
+//		File[] class1Test = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtest").listFiles();
+//		File[] class2Test = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtest").listFiles();
+		File[] class1Test = new File("C:\\Users\\Vincent\\Downloads\\blogs\\MaleTest").listFiles();
+		File[] class2Test = new File("C:\\Users\\Vincent\\Downloads\\blogs\\FemaleTest").listFiles();
 //		File[] class1Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\alt.atheism test").listFiles();
 //		File[] class2Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.graphics test").listFiles();
 //		File[] class3Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.os.ms-windows.misc test").listFiles();
@@ -60,18 +60,18 @@ public class CompleteTest {
 			if(i < documentsClass2Test.size()) {
 				if(controller.getBaysianClassifier().classify(documentsClass2Test.get(i)).equals(class2Class)) {
 					correctlyClassifiedClass2++;
-					//controller.getBaysianClassifier().train(documentsClass2Test.get(i), class2Class);
+					
 				}
 				
-				
+				controller.getBaysianClassifier().train(documentsClass2Test.get(i), class2Class);
 			}
 			
 			if(i < documentsClass1Test.size()) {
 				if(controller.getBaysianClassifier().classify(documentsClass1Test.get(i)).equals(class1Class)) {
 					correctlyClassifiedClass1++;
-					//controller.getBaysianClassifier().train(documentsClass1Test.get(i), class1Class);
+					
 				}
-				
+				controller.getBaysianClassifier().train(documentsClass1Test.get(i), class1Class);
 			}
 			
 			if(i < documentsClass3Test.size()) {
@@ -87,19 +87,21 @@ public class CompleteTest {
 			
 			
 		}
+		
+		
+		
+//		for(Document d: documentsClass2Test) {
+//			if(controller.getBaysianClassifier().classify(d).equals(class2Class)) {
+//				correctlyClassifiedClass2++;
+//			}
+//			controller.getBaysianClassifier().train(d, class2Class);
+//		}
 //		
 //		for(Document d: documentsClass1Test) {
 //			if(controller.getBaysianClassifier().classify(d).equals(class1Class)) {
 //				correctlyClassifiedClass1++;
 //			}
 //			controller.getBaysianClassifier().train(d, class1Class);
-//		}
-//		
-//		for(Document d: documentsClass2Test) {
-//			if(controller.getBaysianClassifier().classify(d).equals(class2Class)) {
-//				correctlyClassifiedClass2++;
-//			}
-//			controller.getBaysianClassifier().train(d, class2Class);
 //		}
 		System.out.println("Result class1 : " + ((double)correctlyClassifiedClass1 / (double)documentsClass1Test.size()) );
 		System.out.println("Result class2 : " + ((double)correctlyClassifiedClass2 / (double)documentsClass2Test.size()) );

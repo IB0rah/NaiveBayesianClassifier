@@ -3,16 +3,18 @@ package model;
 import java.util.*;
 public class BayesianClassifier {
 	
-	private Set<String> vocabulary = new HashSet<String>();
+	
+	private Set<String> featureVocabulary = new HashSet<String>();
 	private Map<Class, Double> classes = new HashMap<Class, Double>();
 	public int documentCount = 0;
+	public int nrOfFeatures = 2;
 	
 	public BayesianClassifier() {
 		
 	}
 	
-	public int getVocabularySize() {
-		return vocabulary.size();
+	public int getfeatureVocabularySize() {
+		return featureVocabulary.size();
 	}
 	
 	public Map<Class, Double> getClasses() {
@@ -21,13 +23,13 @@ public class BayesianClassifier {
 	
 	Set<String> selectFeatures(int nrOfFeatures) {
 		Map<String, Double> chiSquareValues = new HashMap<String, Double>();
-		for(String word: vocabulary) {
+		for(String word: featureVocabulary) {
 			chiSquareValues.put(word, this.ChiSquaredValue(word));
 		}
 		
 		Set<String> highestXChis = new HashSet<>();
-		if(vocabulary.size() <= nrOfFeatures) {
-			highestXChis.addAll(vocabulary);
+		if(featureVocabulary.size() <= nrOfFeatures) {
+			highestXChis.addAll(featureVocabulary);
 		} else {
 			for (int i = 0; i < nrOfFeatures; i++) {
 				String maxWord = chiSquareValues.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
@@ -38,32 +40,20 @@ public class BayesianClassifier {
 		return highestXChis;
 	}
 	public void train(Map<Class, Set<Document>> trainingsData) {
-		this.vocabulary = extractVocabulary(trainingsData);
+		this.featureVocabulary = extractfeatureVocabulary(trainingsData);
 		this.documentCount = CountNumberOfDocs(trainingsData);
-		Set<String> selectedFeatures = this.selectFeatures(250);
 		for(Class c: trainingsData.keySet()) {
 			double classPrior = Math.log10(((double)trainingsData.get(c).size()) / ((double)documentCount)) / Math.log10(2.);
 			classes.put(c, classPrior);
-			c.train(trainingsData.get(c), selectedFeatures );
+			c.train(trainingsData.get(c));
 			System.out.println("CLASS PRIOR : " + c.getName() + " : " + classes.get(c));
 		}
-//		for(Class c : classes.keySet()) {
-//			System.out.println(c.getName() + " : " + c.getConProbs().keySet().size() + " \n");
-//		}
-		
-//		for(Class c: classes.keySet()) {
-//			this.vocabulary.addAll(c.chiSquareFeatureSelection(2));
-//			System.out.println("VOCAB SIZE : " + vocabulary.size());
-//			for(String w : vocabulary) {
-//				System.out.println("WORD : " + w);
-//			}
-//		}
-//		for(Class c: classes.keySet()) {
-//			c.updateConditionalProbabilities();
-//		}
-//		for(Class c : classes.keySet()) {
-//			System.out.println(c.getName() + " : " + c.getConProbs().keySet().size());
-//		}
+		Set<String> selectedFeatures = this.selectFeatures(this.nrOfFeatures);
+		this.featureVocabulary = selectedFeatures;
+		for(Class c: classes.keySet()) {
+			c.updateOnFeatures(selectedFeatures);
+		}
+
 		System.out.println("Done training");
 	}
 	
@@ -76,7 +66,7 @@ public class BayesianClassifier {
 		return result;
 	}
 	
-	public Set<String> extractVocabulary(Map<Class, Set<Document>> trainingsData) {
+	public Set<String> extractfeatureVocabulary(Map<Class, Set<Document>> trainingsData) {
 		Set<String> result = new HashSet<String>();
 		for(Class c: trainingsData.keySet()) {
 			Set<Document> documents = trainingsData.get(c);
@@ -160,6 +150,13 @@ public class BayesianClassifier {
 	public Class classify(Document doc) {
 		Class result = null;
 		double resultValue = -Double.MAX_VALUE;
+		List<String> wordsToEvaluate = new ArrayList<String>();
+		for(String w: doc.getWords()) {
+			if(featureVocabulary.contains(w)) {
+				wordsToEvaluate.add(w);
+			}
+		}
+		doc.words = wordsToEvaluate;
 		for(Class c: classes.keySet()) {
 //			System.out.println("prior : " + classes.get(c) + c.getName());
 //			System.out.println("Conditional probability: " + c.getDocumentConditionalProbability(doc));
@@ -171,7 +168,7 @@ public class BayesianClassifier {
 				result = c;
 			}
 		}
-		System.out.println("Classified as: " + result.getName());
+//		System.out.println("Classified as: " + result.getName());
 		return result;
 	}
 	
@@ -185,14 +182,16 @@ public class BayesianClassifier {
 				classes.put(c, ((double)(classes.get(c) * oldDocCount)/ (double)documentCount));
 			}
 		}
-		document.getWords().stream().filter(word -> !vocabulary.contains(word)).forEach(word -> {
-			vocabulary.add(word);
+		document.getWords().stream().filter(word -> !featureVocabulary.contains(word)).forEach(word -> {
+			featureVocabulary.add(word);
 		});
 		Set<Document> documentAsList = new HashSet<Document>();
 		documentAsList.add(document);
 		c.train(documentAsList);
-//		for(Class cl: classes.keySet()) {
-//			cl.chiSquareFeatureSelection(300);
-//		}
+		Set<String> selectedFeatures = this.selectFeatures(this.nrOfFeatures);
+		this.featureVocabulary = selectedFeatures;
+		for(Class cl: classes.keySet()) {
+			cl.updateOnFeatures(selectedFeatures);
+		}
 	}
 }

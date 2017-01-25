@@ -22,9 +22,9 @@ public class Class {
 		this.bc = classifier;
 	}
 	
-	public int getTotalNumberOfWords() {
+	public int getTotalNumberOfFeatures() {
 		int result = 0;
-		for(String w: bagOfWords.keySet()) {
+		for(String w: conditionalProbabilities.keySet()) {
 			result += getWordFreq(w);
 		}
 		return result;
@@ -50,68 +50,22 @@ public class Class {
 	    return maxValueString; 
 	}
 	
-	public Set<String> chiSquareFeatureSelection(int nrOfFeatures) {
-		Set<String> words = new HashSet<String>();
-		words.addAll(bagOfWords.keySet());
-		Map<String, Double> chisquarevalues = new HashMap<String, Double>();
-		for(String word : bagOfWords.keySet()) {
-			double chiSquaredValue = bc.ChiSquaredValue(word);
-			chisquarevalues.put(word, chiSquaredValue);
-		}
-		//System.out.println("Chi squared values size : " + chisquarevalues.keySet().size());
-//		Set<String> highestXChis = new HashSet<String>();
-		if(bagOfWords.keySet().size() <= this.nrOfFeatures) {
-			highestXChis.addAll(bagOfWords.keySet());
-		} else {
-			for (int i = 0; i < nrOfFeatures; i++) {
-				String maxWord = chisquarevalues.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
-				highestXChis.add(maxWord);
-				chisquarevalues.remove(maxWord);
-			}
-		}
-		for(String w : highestXChis) {
-			//System.out.println("CONTAINING HTIS WORD : " + w);
-		}
-		
-//		System.out.println("highestXChis size : " + highestXChis.size());
-//		System.out.println("bagOfWordsSize : " + bagOfWords.size());
-//		bagOfWords.keySet().stream().filter(word -> !highestXChis.contains(word));
-//		conditionalProbabilities.keySet().stream().filter(word -> !highestXChis.contains(word));
-		
-		try {
-			PrintWriter out = new PrintWriter("Features" + this.getName() + ".txt");
-			for(String s: highestXChis) {
-				out.println(s + " \n");
-			}
-			out.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		Map<String, Map<Document, Integer>> bagOfWordsCopy = new HashMap<String, Map<Document, Integer>>();
-		bagOfWordsCopy.putAll(bagOfWords);
+	public void updateOnFeatures(Set<String> features) {
+		conditionalProbabilities.clear();
 		for(String word: bagOfWords.keySet()) {
-			if(!highestXChis.contains(word)) {
-				bagOfWordsCopy.remove(word);
+			if(features.contains(word)) {
+				conditionalProbabilities.put(word, 0.0);
 			}
 		}
-//		ConProbsString();
-		return bagOfWordsCopy.keySet();
+		this.updateConditionalProbabilities();
 	}
-	public void train(Set<Document> documents, Set<String> features) {
-		
-		int totalWordCount = 0;
-		for(Document d: documents) {
-			totalWordCount += d.getWords().size();
-		}
-		
-//		System.out.println("TOTAL WORD SIZE : " + totalWordCount);
-		for(Document doc: documents) {
+	
+	public void train(Set<Document> docs) {
+		for(Document doc: docs) {
 			this.train(doc);
 		}
-
-		//chiSquareFeatureSelection(300);
-//		System.out.println("BagOfWords size : " + bagOfWords.size() + "conProbs Size : " + conditionalProbabilities.size() + " Total nr of words : " + totalNumberOfWords);
 	}
+
 	
 	public Map<Document, Integer> getDocumentListWord(String word) {
 		Map<Document, Integer> result = null;
@@ -122,21 +76,14 @@ public class Class {
 	}
 	
 	public void updateConditionalProbabilities() {
-		Map<String, Map<Document, Integer>> bagOfWordsCopy = new HashMap<String, Map<Document, Integer>>();
-		bagOfWordsCopy.putAll(bagOfWords);
-		for(String word: bagOfWordsCopy.keySet()) {
-			if(!highestXChis.contains(word)) {
-				bagOfWords.remove(word);
-			}
-		}
-		for(String word: bagOfWords.keySet()) {
-//			System.out.println("THIS CALCULATION FOR THE PROB : " + getWordFreq(word) + " + " + SMOOTHING + " / " + this.getTotalNumberOfWords() + " + " + SMOOTHING + " * " + bc.getVocabularySize());
-			double conditionalProbability = Math.log10(((double)(getWordFreq(word) + SMOOTHING)) /((double)(this.getTotalNumberOfWords() + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
-//			System.out.println("CLASS : " + this.getName());
-//			System.out.println("Added : " + word + " " + conditionalProbability);
+		for(String word: conditionalProbabilities.keySet()) {
+//		System.out.println("THIS CALCULATION FOR THE PROB : " + getWordFreq(word) + " + " + SMOOTHING + " / " + this.getTotalNumberOfFeatures() + " + " + SMOOTHING + " * " + bc.getVocabularySize());
+			double conditionalProbability = Math.log10(((double)(getWordFreq(word) + SMOOTHING)) /((double)(this.getTotalNumberOfFeatures() + SMOOTHING * bc.getfeatureVocabularySize()))) / Math.log10(2.);
+			System.out.println("CLASS : " + this.getName());
+			System.out.println("Added : " + word + " " + conditionalProbability);
 			conditionalProbabilities.put(word, conditionalProbability );
 		}
-		this.notExistingProbability = Math.log10(((double)(0 + SMOOTHING)) /((double)(this.getTotalNumberOfWords() + SMOOTHING * bc.getVocabularySize()))) / Math.log10(2.);
+		this.notExistingProbability = Math.log10(((double)(0 + SMOOTHING)) /((double)(this.getTotalNumberOfFeatures() + SMOOTHING * bc.getfeatureVocabularySize()))) / Math.log10(2.);
 	}
 	
 	public int getTotalNrOfDocs() {
