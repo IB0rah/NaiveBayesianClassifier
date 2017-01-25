@@ -51,6 +51,10 @@ public class GUI extends Application {
     private boolean classifying;
     private Class resultClass;
     private ProgressIndicator pi;
+    
+    public static void main(String[] args) {
+    	launch(args);
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {

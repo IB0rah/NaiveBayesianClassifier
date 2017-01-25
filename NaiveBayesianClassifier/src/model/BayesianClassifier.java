@@ -25,6 +25,7 @@ public class BayesianClassifier {
 		for(Class c: trainingsData.keySet()) {
 			double classPrior = Math.log10(((double)trainingsData.get(c).size()) / ((double)documentCount)) / Math.log10(2.);
 			classes.put(c, classPrior);
+			
 			c.train(trainingsData.get(c));
 			System.out.println("CLASS PRIOR : " + c.getName() + " : " + classes.get(c));
 		}
@@ -32,10 +33,10 @@ public class BayesianClassifier {
 //			System.out.println(c.getName() + " : " + c.getConProbs().keySet().size() + " \n");
 //		}
 		for(Class c: classes.keySet()) {
-			this.vocabulary.addAll(c.chiSquareFeatureSelection(1000));
-//			System.out.println("VOCAB SIZE : " + vocabulary.size());
+			this.vocabulary.addAll(c.chiSquareFeatureSelection(2));
+			System.out.println("VOCAB SIZE : " + vocabulary.size());
 			for(String w : vocabulary) {
-//				System.out.println("WORD : " + w);
+				System.out.println("WORD : " + w);
 			}
 		}
 		for(Class c: classes.keySet()) {
@@ -104,20 +105,24 @@ public class BayesianClassifier {
 		
 		for(i = 0; i < 3; i++) {
 			for(int j = 0; j < classes.keySet().size(); j++) {
-				//System.out.println(" DOING THIS CALCULATION : " + chiSquareTable[i][classes.keySet().size()] + " * " + chiSquareTable[2][j] + " / " + chiSquareTable[2][classes.keySet().size()] + "\n");
+				
 				double expected = chiSquareTable[i][classes.keySet().size()] * chiSquareTable[2][j] / chiSquareTable[2][classes.keySet().size()]; 
-				//System.out.println("EXPECTED : " + expected);
-				result += Math.pow(chiSquareTable[i][j] - expected, 2) / expected;
+				//System.out.println( "THIS WORD : " + word);
+				if(expected == 0) {
+					expected = Double.MIN_VALUE;
+				}
+//				System.out.println("FACTOR :" + (double)(Math.pow(chiSquareTable[i][j] - expected, 2)) /(double)(expected) );
+				result += (double)(Math.pow(chiSquareTable[i][j] - expected, 2)) /(double)(expected);
 				//System.out.println(result);
 			}
 		}
 		
-//		System.out.println("Word : " + word + " \n" + "Chi2: " + result);
-//		for(i = 0; i < 3; i++) {
-//			for(int j = 0; j < classes.keySet().size(); j++) {
-//				System.out.println(i + ", " + j + "value : " + chiSquareTable[i][j]);
-//			}
-//		}
+//		System.out.println("Word : " + word + "Chi2: " + result);
+		for(i = 0; i < 3; i++) {
+			for(int j = 0; j < classes.keySet().size(); j++) {
+				//System.out.println(i + ", " + j + "value : " + chiSquareTable[i][j]);
+			}
+		}
 		
 //		System.out.println("word : " + word +  "Chi squared value : " + result);
 		return result;
