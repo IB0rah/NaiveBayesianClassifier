@@ -19,29 +19,48 @@ public class BayesianClassifier {
 		return classes;
 	}
 	
+	Set<String> selectFeatures(int nrOfFeatures) {
+		Map<String, Double> chiSquareValues = new HashMap<String, Double>();
+		for(String word: vocabulary) {
+			chiSquareValues.put(word, this.ChiSquaredValue(word));
+		}
+		
+		Set<String> highestXChis = new HashSet<>();
+		if(vocabulary.size() <= nrOfFeatures) {
+			highestXChis.addAll(vocabulary);
+		} else {
+			for (int i = 0; i < nrOfFeatures; i++) {
+				String maxWord = chiSquareValues.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
+				highestXChis.add(maxWord);
+				chiSquareValues.remove(maxWord);
+			}
+		}
+		return highestXChis;
+	}
 	public void train(Map<Class, Set<Document>> trainingsData) {
-		//this.vocabulary = extractVocabulary(trainingsData);
+		this.vocabulary = extractVocabulary(trainingsData);
 		this.documentCount = CountNumberOfDocs(trainingsData);
+		Set<String> selectedFeatures = this.selectFeatures(250);
 		for(Class c: trainingsData.keySet()) {
 			double classPrior = Math.log10(((double)trainingsData.get(c).size()) / ((double)documentCount)) / Math.log10(2.);
 			classes.put(c, classPrior);
-			
-			c.train(trainingsData.get(c));
+			c.train(trainingsData.get(c), selectedFeatures );
 			System.out.println("CLASS PRIOR : " + c.getName() + " : " + classes.get(c));
 		}
 //		for(Class c : classes.keySet()) {
 //			System.out.println(c.getName() + " : " + c.getConProbs().keySet().size() + " \n");
 //		}
-		for(Class c: classes.keySet()) {
-			this.vocabulary.addAll(c.chiSquareFeatureSelection(2));
-			System.out.println("VOCAB SIZE : " + vocabulary.size());
-			for(String w : vocabulary) {
-				System.out.println("WORD : " + w);
-			}
-		}
-		for(Class c: classes.keySet()) {
-			c.updateConditionalProbabilities();
-		}
+		
+//		for(Class c: classes.keySet()) {
+//			this.vocabulary.addAll(c.chiSquareFeatureSelection(2));
+//			System.out.println("VOCAB SIZE : " + vocabulary.size());
+//			for(String w : vocabulary) {
+//				System.out.println("WORD : " + w);
+//			}
+//		}
+//		for(Class c: classes.keySet()) {
+//			c.updateConditionalProbabilities();
+//		}
 //		for(Class c : classes.keySet()) {
 //			System.out.println(c.getName() + " : " + c.getConProbs().keySet().size());
 //		}

@@ -97,7 +97,7 @@ public class Class {
 //		ConProbsString();
 		return bagOfWordsCopy.keySet();
 	}
-	public void train(Set<Document> documents) {
+	public void train(Set<Document> documents, Set<String> features) {
 		
 		int totalWordCount = 0;
 		for(Document d: documents) {
@@ -110,7 +110,7 @@ public class Class {
 		}
 
 		//chiSquareFeatureSelection(300);
-		//System.out.println("BagOfWords size : " + bagOfWords.size() + "conProbs Size : " + conditionalProbabilities.size() + " Total nr of words : " + totalNumberOfWords);
+//		System.out.println("BagOfWords size : " + bagOfWords.size() + "conProbs Size : " + conditionalProbabilities.size() + " Total nr of words : " + totalNumberOfWords);
 	}
 	
 	public Map<Document, Integer> getDocumentListWord(String word) {
