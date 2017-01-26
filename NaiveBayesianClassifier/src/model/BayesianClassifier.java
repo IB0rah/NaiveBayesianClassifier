@@ -32,6 +32,19 @@ public class BayesianClassifier {
 		}
 		
 		Set<String> highestXChis = new HashSet<>();
+		
+		
+		try {
+			PrintWriter out = new PrintWriter("SelectedFeatures.txt");
+			for(String word : chiSquareValues.keySet()) {
+				out.write(word + " : " + chiSquareValues.get(word) + "\n");
+			}
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		if(featureVocabulary.size() <= nrOfFeatures) {
 			highestXChis.addAll(featureVocabulary);
 		} else {
@@ -42,16 +55,6 @@ public class BayesianClassifier {
 			}
 		}
 		
-		try {
-			PrintWriter out = new PrintWriter("SelectedFeatures.txt");
-			for(String word : highestXChis) {
-				out.write(word + " : " + chiSquareValues.get(word) + "\n");
-			}
-			out.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return highestXChis;
 	}
 	public void train(Map<Class, Set<Document>> trainingsData) {
