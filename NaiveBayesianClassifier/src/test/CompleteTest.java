@@ -6,14 +6,40 @@ import java.util.*;
 import model.*;
 import model.Class;
 import controller.Controller;
+import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.LineChart;
+import javafx.stage.Stage;
+import javafx.application.*;
 
-public class CompleteTest {
-	public static void main(String[] args) {
-		Controller controller = new Controller();
-		File[] class1Train = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\ham").listFiles();
-		File[] class2Train = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spam").listFiles();
-//		File[] class1Train = new File("C:\\Users\\V\\Downloads\\blogs\\MaleTrain").listFiles();
-//		File[] class2Train = new File("C:\\Users\\V\\Downloads\\blogs\\FemaleTrain").listFiles();
+public class CompleteTest extends Application {
+	
+	@Override 
+	public void start(Stage stage) {
+        stage.setTitle("Accuracy measurement");
+        //defining the axes
+        final NumberAxis xAxis = new NumberAxis();
+        final NumberAxis yAxis = new NumberAxis(0.5, 1, 0.01);
+        yAxis.setAutoRanging(false);
+        xAxis.setLabel("% of data classified");
+        //creating the chart
+        final LineChart<Number,Number> lineChart = 
+                new LineChart<Number,Number>(xAxis,yAxis);
+                
+        lineChart.setTitle("Accuracy over time :");
+        lineChart.setCreateSymbols(false);
+        XYChart.Series seriesTotal = new XYChart.Series();
+        XYChart.Series seriesClass1 = new XYChart.Series();
+        XYChart.Series seriesClass2 = new XYChart.Series();
+        seriesTotal.setName("Overall accuracy");
+        seriesClass1.setName("Class 1 accuracy");
+        seriesClass2.setName("Class 2 accuracy");
+        Controller controller = new Controller();
+		File[] class1Train = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtraintest").listFiles();
+		File[] class2Train = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtraintest").listFiles();
+//		File[] class1Train = new File("C:\\Users\\Vincent\\Downloads\\blogs\\MaleTest").listFiles();
+//		File[] class2Train = new File("C:\\Users\\Vincent\\Downloads\\blogs\\FemaleTest").listFiles();
 //		File[] class1Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\alt.atheism train").listFiles();
 //		File[] class2Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.graphics train").listFiles();
 //		File[] class3Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.os.ms-windows.misc train").listFiles();
@@ -28,7 +54,6 @@ public class CompleteTest {
 		Class class1Class = new Class("Class1", controller.getBaysianClassifier());
 		Class class2Class = new Class("Class2", controller.getBaysianClassifier());
 		Class class3Class = new Class("Class3", controller.getBaysianClassifier());
-
 		controller.addClassWithDocs(class1Class, documentsClass1);
 		controller.addClassWithDocs(class2Class, documentsClass2);
 //		controller.addClassWithDocs(class3Class, documentsClass3);
@@ -36,10 +61,10 @@ public class CompleteTest {
 		System.out.println("Document count: " + controller.getBaysianClassifier().documentCount);
 		System.out.println("Vocabulary size: " + controller.getBaysianClassifier().getfeatureVocabularySize());
 		
-		File[] class1Test = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtest").listFiles();
-		File[] class2Test = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtest").listFiles();
-//		File[] class1Test = new File("C:\\Users\\V\\Downloads\\blogs\\MaleTest").listFiles();
-//		File[] class2Test = new File("C:\\Users\\V\\Downloads\\blogs\\FemaleTest").listFiles();
+		File[] class1Test = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtest").listFiles();
+		File[] class2Test = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtest").listFiles();
+//		File[] class1Test = new File("C:\\Users\\Vincent\\Downloads\\blogs\\MaleTrain").listFiles();
+//		File[] class2Test = new File("C:\\Users\\Vincent\\Downloads\\blogs\\FemaleTrain").listFiles();
 //		File[] class1Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\alt.atheism test").listFiles();
 //		File[] class2Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.graphics test").listFiles();
 //		File[] class3Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.os.ms-windows.misc test").listFiles();
@@ -53,7 +78,8 @@ public class CompleteTest {
 		int correctlyClassifiedClass1 = 0;
 		int correctlyClassifiedClass2 = 0;
 		int correctlyClassifiedClass3 = 0;
-		int totalClassified = 0;
+		int totalClassified1 = 0;
+		int totalClassified2 = 0;
 		System.out.println("Max. index : " + Math.max(documentsClass1Test.size(), Math.max(documentsClass2Test.size(), documentsClass3Test.size())));
 		
 		for(int i = 0; i < Math.max(documentsClass1Test.size(), Math.max(documentsClass2Test.size(), documentsClass3Test.size())); i++) {
@@ -63,7 +89,7 @@ public class CompleteTest {
 					correctlyClassifiedClass2++;
 					
 				}
-				totalClassified++;
+				totalClassified2++;
 				controller.getBaysianClassifier().train(documentsClass2Test.get(i), class2Class);
 			}
 			
@@ -72,11 +98,9 @@ public class CompleteTest {
 					correctlyClassifiedClass1++;
 					
 				}
-				totalClassified++;
+				totalClassified1++;
 				controller.getBaysianClassifier().train(documentsClass1Test.get(i), class1Class);
 			}
-			
-			
 			
 //			if(i < documentsClass3Test.size()) {
 //				if(controller.getBaysianClassifier().classify(documentsClass3Test.get(i)).equals(class3Class)) {
@@ -87,8 +111,10 @@ public class CompleteTest {
 //				controller.getBaysianClassifier().train(documentsClass3Test.get(i), class3Class);
 //			}
 			
-			System.out.println("preliminary % correct : " + ((double)(correctlyClassifiedClass2 + correctlyClassifiedClass1) / totalClassified));
-			
+			System.out.println("preliminary % correct : " + ((double)(correctlyClassifiedClass2 + correctlyClassifiedClass1) / (totalClassified1 + totalClassified2)));
+			seriesTotal.getData().add(new XYChart.Data((totalClassified1 + totalClassified2), ((double)(correctlyClassifiedClass2 + correctlyClassifiedClass1) / (totalClassified1 + totalClassified2))));
+			seriesClass1.getData().add(new XYChart.Data((totalClassified1 + totalClassified2), ((double)(correctlyClassifiedClass1) / totalClassified1)));
+			seriesClass2.getData().add(new XYChart.Data((totalClassified1 + totalClassified2), ((double)(correctlyClassifiedClass2) / totalClassified2)));
 			
 			
 		}
@@ -118,5 +144,18 @@ public class CompleteTest {
 //		for(Class c: controller.getBaysianClassifier().getClasses().keySet()) {
 //			c.ConProbsString();
 //		}
-	}
+		
+		Scene scene  = new Scene(lineChart,800,600);
+		lineChart.getData().add(seriesTotal);
+		lineChart.getData().add(seriesClass2);
+		lineChart.getData().add(seriesClass1);
+	       
+		stage.setScene(scene);
+        stage.show();
+    }
+ 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
 }

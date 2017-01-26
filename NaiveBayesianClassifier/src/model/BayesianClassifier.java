@@ -9,7 +9,7 @@ public class BayesianClassifier {
 	private Set<String> featureVocabulary = new HashSet<String>();
 	private Map<Class, Double> classes = new HashMap<Class, Double>();
 	public int documentCount = 0;
-	//FOR SPAM/HAM: Optimal at ~2100 features (99.3%), FOR BLOGS THIS IS 300 (74%)
+	//FOR SPAM/HAM: Optimal at ~2100 features (99.3%), FOR BLOGS THIS IS 300 (75%)
 	public int nrOfFeatures = 300;
 	
 	public BayesianClassifier() {
@@ -126,9 +126,7 @@ public class BayesianClassifier {
 			totalValueRow2 += chiSquareTable[1][i];
 			totalValueRow3 += chiSquareTable[2][i];
 		}
-		if(totalValueRow1 <= 3) {
-			return -1.0;
-		}
+		
 		chiSquareTable[0][classes.keySet().size()] = totalValueRow1;
 		chiSquareTable[1][classes.keySet().size()] = totalValueRow2;
 		chiSquareTable[2][classes.keySet().size()] = totalValueRow3;
@@ -148,11 +146,11 @@ public class BayesianClassifier {
 		}
 		
 //		System.out.println("Word : " + word + "Chi2: " + result);
-		for(i = 0; i < 3; i++) {
-			for(int j = 0; j < classes.keySet().size(); j++) {
-				//System.out.println(i + ", " + j + "value : " + chiSquareTable[i][j]);
-			}
-		}
+//		for(i = 0; i < 3; i++) {
+//			for(int j = 0; j < classes.keySet().size(); j++) {
+//				System.out.println(i + ", " + j + "value : " + chiSquareTable[i][j]);
+//			}
+//		}
 		
 //		System.out.println("word : " + word +  "Chi squared value : " + result);
 		return result;
@@ -213,11 +211,13 @@ public class BayesianClassifier {
 		for(Class cl : classes.keySet()) {
 			totalNumberOfDocs += cl.getTotalNrOfDocs();
 		}
+//		System.out.println("Total nr of docs after training : " + totalNumberOfDocs);
 		for(Class cl: classes.keySet()) {
 			classes.put(cl, Math.log10(((double)cl.getTotalNrOfDocs() / (double)totalNumberOfDocs)) / Math.log10(2.));
 		}
 //		for(Class cl : classes.keySet()) {
 //			System.out.println("CLASS prior after : " + classes.get(cl));
 //		}
+//		System.out.println("vocab size" + this.featureVocabulary.size());
 	}
 }

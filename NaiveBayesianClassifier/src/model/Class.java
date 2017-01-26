@@ -54,7 +54,7 @@ public class Class {
 	
 	public void updateConditionalProbabilities() {
 		for(String word: conditionalProbabilities.keySet()) {
-//		System.out.println("THIS CALCULATION FOR THE PROB : " + getWordFreq(word) + " + " + SMOOTHING + " / " + this.getTotalNumberOfFeatures() + " + " + SMOOTHING + " * " + bc.getVocabularySize());
+//		System.out.println("THIS CALCULATION FOR THE PROB : " + getWordFreq(word) + " + " + SMOOTHING + " / " + this.getTotalNumberOfFeatures() + " + " + SMOOTHING + " * " + bc.getfeatureVocabularySize());
 			double conditionalProbability = Math.log10(((double)(getWordFreq(word) + SMOOTHING)) /((double)(this.getTotalNumberOfFeatures() + SMOOTHING * bc.getfeatureVocabularySize()))) / Math.log10(2.);
 //			System.out.println("CLASS : " + this.getName());
 //			System.out.println("Added : " + word + " " + conditionalProbability);
@@ -160,7 +160,7 @@ public class Class {
 	public String ConProbsString() {
 		String result = "";
 		for(String word: conditionalProbabilities.keySet()) {
-			System.out.println(word + "prob: " + conditionalProbabilities.get(word));
+//			System.out.println(word + "prob: " + conditionalProbabilities.get(word));
 		}
 		return result;
 	}
