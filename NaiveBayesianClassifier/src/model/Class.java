@@ -10,12 +10,9 @@ public class Class {
 	Map<String, Map<Document, Integer>> bagOfWords = new HashMap<String, Map<Document, Integer>>();
 	Map<String, Double> conditionalProbabilities = new HashMap<String, Double>();
 	private double notExistingProbability;
-	private int totalNumberOfWords = 0;
 	private int totalNumberOfDocs = 0;
 	private BayesianClassifier bc;
 	private String name;
-	private int nrOfFeatures = 2;
-	Set<String> highestXChis = new HashSet<>();
 	
 	public Class(String name, BayesianClassifier classifier) {
 		this.name = name;
@@ -28,26 +25,6 @@ public class Class {
 			result += getWordFreq(w);
 		}
 		return result;
-	}
-	
-	public String getMax(Set<String> input){ 
-		Iterator<String> iterator = input.iterator();
-		double maxValue = 0;
-		String maxValueString = "";
-		if(iterator.hasNext()) {
-			String nextWord = iterator.next();
-			maxValue = bc.ChiSquaredValue(nextWord);
-			maxValueString = nextWord;
-		}
-
-		while(iterator.hasNext()){ 
-			String nextWord = iterator.next();
-			if(bc.ChiSquaredValue(nextWord) > maxValue){ 
-	         maxValue = bc.ChiSquaredValue(nextWord);
-	         maxValueString = nextWord;
-			} 
-	    } 
-	    return maxValueString; 
 	}
 	
 	public void updateOnFeatures(Set<String> features) {
@@ -79,8 +56,8 @@ public class Class {
 		for(String word: conditionalProbabilities.keySet()) {
 //		System.out.println("THIS CALCULATION FOR THE PROB : " + getWordFreq(word) + " + " + SMOOTHING + " / " + this.getTotalNumberOfFeatures() + " + " + SMOOTHING + " * " + bc.getVocabularySize());
 			double conditionalProbability = Math.log10(((double)(getWordFreq(word) + SMOOTHING)) /((double)(this.getTotalNumberOfFeatures() + SMOOTHING * bc.getfeatureVocabularySize()))) / Math.log10(2.);
-			System.out.println("CLASS : " + this.getName());
-			System.out.println("Added : " + word + " " + conditionalProbability);
+//			System.out.println("CLASS : " + this.getName());
+//			System.out.println("Added : " + word + " " + conditionalProbability);
 			conditionalProbabilities.put(word, conditionalProbability );
 		}
 		this.notExistingProbability = Math.log10(((double)(0 + SMOOTHING)) /((double)(this.getTotalNumberOfFeatures() + SMOOTHING * bc.getfeatureVocabularySize()))) / Math.log10(2.);
@@ -115,7 +92,6 @@ public class Class {
 	
 	//Add a word
 	public void putWordTrain(String word, Document document) {
-		totalNumberOfWords++;
 		if(bagOfWords.containsKey(word) && !bagOfWords.get(word).containsKey(document)) {
 			bagOfWords.get(word).put(document, 1);
 		} else if(bagOfWords.containsKey(word) && bagOfWords.get(word).containsKey(document)) {
@@ -129,13 +105,13 @@ public class Class {
 //		System.out.println("BAGOFWORDSSIZE OP DEZE PUNT " + bagOfWords.size());
 	}
 
-	public double getDocumentConditionalProbability(Document doc) {
+	public double getDocumentConditionalProbability(List<String> docwords) {
 		
 //		ConProbsString();
 //		System.out.println(" Hoe dan");
 //		System.out.println("Found the following feautres for class:" + this.getName() +   "\n" );
 		double score = 0;
-		for(String word : doc.getWords()) {
+		for(String word : docwords) {
 			score =  score + getWordConditionalProbability(word);
 			//System.out.println("Score : " + score);
 		}

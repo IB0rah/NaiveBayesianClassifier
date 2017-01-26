@@ -1,5 +1,7 @@
 package model;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 public class BayesianClassifier {
 	
@@ -7,7 +9,8 @@ public class BayesianClassifier {
 	private Set<String> featureVocabulary = new HashSet<String>();
 	private Map<Class, Double> classes = new HashMap<Class, Double>();
 	public int documentCount = 0;
-	public int nrOfFeatures = 2;
+	//FOR SPAM/HAM: Optimal at ~2100 features (99.3%), FOR BLOGS THIS IS 300 (74%)
+	public int nrOfFeatures = 300;
 	
 	public BayesianClassifier() {
 		
@@ -24,6 +27,7 @@ public class BayesianClassifier {
 	Set<String> selectFeatures(int nrOfFeatures) {
 		Map<String, Double> chiSquareValues = new HashMap<String, Double>();
 		for(String word: featureVocabulary) {
+			
 			chiSquareValues.put(word, this.ChiSquaredValue(word));
 		}
 		
@@ -36,6 +40,17 @@ public class BayesianClassifier {
 				highestXChis.add(maxWord);
 				chiSquareValues.remove(maxWord);
 			}
+		}
+		
+		try {
+			PrintWriter out = new PrintWriter("SelectedFeatures.txt");
+			for(String word : highestXChis) {
+				out.write(word + " : " + chiSquareValues.get(word) + "\n");
+			}
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return highestXChis;
 	}
@@ -108,6 +123,9 @@ public class BayesianClassifier {
 			totalValueRow2 += chiSquareTable[1][i];
 			totalValueRow3 += chiSquareTable[2][i];
 		}
+		if(totalValueRow1 <= 3) {
+			return -1.0;
+		}
 		chiSquareTable[0][classes.keySet().size()] = totalValueRow1;
 		chiSquareTable[1][classes.keySet().size()] = totalValueRow2;
 		chiSquareTable[2][classes.keySet().size()] = totalValueRow3;
@@ -156,14 +174,14 @@ public class BayesianClassifier {
 				wordsToEvaluate.add(w);
 			}
 		}
-		doc.words = wordsToEvaluate;
+//		doc.words = wordsToEvaluate;
 		for(Class c: classes.keySet()) {
 //			System.out.println("prior : " + classes.get(c) + c.getName());
 //			System.out.println("Conditional probability: " + c.getDocumentConditionalProbability(doc));
-			double classProbability = classes.get(c) + c.getDocumentConditionalProbability(doc);
+			double classProbability = classes.get(c) + c.getDocumentConditionalProbability(wordsToEvaluate);
 //			System.out.println(c.toString() + " " + classProbability );
-			//System.out.println(c.toString() + " Probability : " + classProbability);
-			if(classProbability >= resultValue) {
+//			System.out.println(c.toString() + " Probability : " + classProbability);
+			if(classProbability > resultValue) {
 				resultValue = classProbability;
 				result = c;
 			}
@@ -173,18 +191,13 @@ public class BayesianClassifier {
 	}
 	
 	public void train(Document document, Class c) {
-		double oldDocCount = documentCount;
-		documentCount++;
-		for(Class cl: classes.keySet()) {
-			if(cl.equals(c)) {
-				classes.put(c, ((double)((classes.get(c) + 1) * oldDocCount)) / ((double)documentCount));
-			} else {
-				classes.put(c, ((double)(classes.get(c) * oldDocCount)/ (double)documentCount));
-			}
-		}
+		
 		document.getWords().stream().filter(word -> !featureVocabulary.contains(word)).forEach(word -> {
 			featureVocabulary.add(word);
 		});
+//		for(Class cl : classes.keySet()) {
+//			System.out.println("CLASS prior before : " + classes.get(cl));
+//		}
 		Set<Document> documentAsList = new HashSet<Document>();
 		documentAsList.add(document);
 		c.train(documentAsList);
@@ -193,5 +206,15 @@ public class BayesianClassifier {
 		for(Class cl: classes.keySet()) {
 			cl.updateOnFeatures(selectedFeatures);
 		}
+		double totalNumberOfDocs = 0;
+		for(Class cl : classes.keySet()) {
+			totalNumberOfDocs += cl.getTotalNrOfDocs();
+		}
+		for(Class cl: classes.keySet()) {
+			classes.put(cl, Math.log10(((double)cl.getTotalNrOfDocs() / (double)totalNumberOfDocs)) / Math.log10(2.));
+		}
+//		for(Class cl : classes.keySet()) {
+//			System.out.println("CLASS prior after : " + classes.get(cl));
+//		}
 	}
 }
