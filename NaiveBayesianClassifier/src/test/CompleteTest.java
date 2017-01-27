@@ -19,8 +19,8 @@ public class CompleteTest extends Application {
 	public void start(Stage stage) {
         stage.setTitle("Accuracy measurement");
         //defining the axes
-        final NumberAxis xAxis = new NumberAxis();
-        final NumberAxis yAxis = new NumberAxis(0.5, 1, 0.01);
+        NumberAxis xAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis(0.3, 1, 0.01);
         yAxis.setAutoRanging(false);
         xAxis.setLabel("% of data classified");
         //creating the chart
@@ -36,10 +36,10 @@ public class CompleteTest extends Application {
         seriesClass1.setName("Class 1 accuracy");
         seriesClass2.setName("Class 2 accuracy");
         Controller controller = new Controller();
-		File[] class1Train = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtraintest").listFiles();
-		File[] class2Train = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtraintest").listFiles();
-//		File[] class1Train = new File("C:\\Users\\Vincent\\Downloads\\blogs\\MaleTest").listFiles();
-//		File[] class2Train = new File("C:\\Users\\Vincent\\Downloads\\blogs\\FemaleTest").listFiles();
+		File[] class1Train = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\ham").listFiles();
+		File[] class2Train = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spam").listFiles();
+//		File[] class1Train = new File("C:\\Users\\V\\Downloads\\blogs\\MaleTrain").listFiles();
+//		File[] class2Train = new File("C:\\Users\\V\\Downloads\\blogs\\FemaleTrain").listFiles();
 //		File[] class1Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\alt.atheism train").listFiles();
 //		File[] class2Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.graphics train").listFiles();
 //		File[] class3Train = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.os.ms-windows.misc train").listFiles();
@@ -61,10 +61,10 @@ public class CompleteTest extends Application {
 		System.out.println("Document count: " + controller.getBaysianClassifier().documentCount);
 		System.out.println("Vocabulary size: " + controller.getBaysianClassifier().getfeatureVocabularySize());
 		
-		File[] class1Test = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtest").listFiles();
-		File[] class2Test = new File("C:\\Users\\Vincent\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtest").listFiles();
-//		File[] class1Test = new File("C:\\Users\\Vincent\\Downloads\\blogs\\MaleTrain").listFiles();
-//		File[] class2Test = new File("C:\\Users\\Vincent\\Downloads\\blogs\\FemaleTrain").listFiles();
+		File[] class1Test = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\hamtest").listFiles();
+		File[] class2Test = new File("C:\\Users\\V\\Downloads\\corpus-mails\\corpus-mails\\corpus\\spamtest").listFiles();
+//		File[] class1Test = new File("C:\\Users\\V\\Downloads\\blogs\\MaleTest").listFiles();
+//		File[] class2Test = new File("C:\\Users\\V\\Downloads\\blogs\\FemaleTest").listFiles();
 //		File[] class1Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\alt.atheism test").listFiles();
 //		File[] class2Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.graphics test").listFiles();
 //		File[] class3Test = new File("C:\\Users\\V\\Downloads\\news20.tar\\20_newsgroup\\comp.os.ms-windows.misc test").listFiles();
@@ -90,7 +90,7 @@ public class CompleteTest extends Application {
 					
 				}
 				totalClassified2++;
-				controller.getBaysianClassifier().train(documentsClass2Test.get(i), class2Class);
+//				controller.getBaysianClassifier().train(documentsClass2Test.get(i), class2Class);
 			}
 			
 			if(i < documentsClass1Test.size()) {
@@ -99,7 +99,7 @@ public class CompleteTest extends Application {
 					
 				}
 				totalClassified1++;
-				controller.getBaysianClassifier().train(documentsClass1Test.get(i), class1Class);
+//				controller.getBaysianClassifier().train(documentsClass1Test.get(i), class1Class);
 			}
 			
 //			if(i < documentsClass3Test.size()) {
@@ -111,10 +111,15 @@ public class CompleteTest extends Application {
 //				controller.getBaysianClassifier().train(documentsClass3Test.get(i), class3Class);
 //			}
 			
+			double percentageClassified =  ((double)(totalClassified1 + totalClassified2)) / ((double)(documentsClass1Test.size() + documentsClass2Test.size()));
+			System.out.println("PERCENTAGE CLASSIFIED : " + percentageClassified);
 			System.out.println("preliminary % correct : " + ((double)(correctlyClassifiedClass2 + correctlyClassifiedClass1) / (totalClassified1 + totalClassified2)));
-			seriesTotal.getData().add(new XYChart.Data((totalClassified1 + totalClassified2), ((double)(correctlyClassifiedClass2 + correctlyClassifiedClass1) / (totalClassified1 + totalClassified2))));
-			seriesClass1.getData().add(new XYChart.Data((totalClassified1 + totalClassified2), ((double)(correctlyClassifiedClass1) / totalClassified1)));
-			seriesClass2.getData().add(new XYChart.Data((totalClassified1 + totalClassified2), ((double)(correctlyClassifiedClass2) / totalClassified2)));
+			if(percentageClassified > 0.05) {
+				seriesTotal.getData().add(new XYChart.Data(percentageClassified, ((double)(correctlyClassifiedClass2 + correctlyClassifiedClass1) / (totalClassified1 + totalClassified2))));
+				seriesClass1.getData().add(new XYChart.Data(percentageClassified, ((double)(correctlyClassifiedClass1) / totalClassified1)));
+				seriesClass2.getData().add(new XYChart.Data(percentageClassified, ((double)(correctlyClassifiedClass2) / totalClassified2)));
+			}
+			
 			
 			
 		}

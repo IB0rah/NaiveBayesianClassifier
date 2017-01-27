@@ -10,7 +10,7 @@ public class BayesianClassifier {
 	private Map<Class, Double> classes = new HashMap<Class, Double>();
 	public int documentCount = 0;
 	//FOR SPAM/HAM: Optimal at ~2100 features (99.3%), FOR BLOGS THIS IS 300 (75%)
-	public int nrOfFeatures = 300;
+	public int nrOfFeatures = 2000;
 	
 	public BayesianClassifier() {
 		
@@ -57,7 +57,8 @@ public class BayesianClassifier {
 		
 		return highestXChis;
 	}
-	public void train(Map<Class, Set<Document>> trainingsData) {
+	public void train(Map<Class, Set<Document>> trainingsData, int featureSize) {
+		this.nrOfFeatures = featureSize;
 		this.featureVocabulary = extractfeatureVocabulary(trainingsData);
 		this.documentCount = CountNumberOfDocs(trainingsData);
 		for(Class c: trainingsData.keySet()) {

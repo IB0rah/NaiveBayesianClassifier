@@ -11,19 +11,21 @@ import java.util.Set;
 
 public class Controller {
 
-    BayesianClassifier baysianClassifier;
+    BayesianClassifier bayesianClassifier;
     Map<Class, Set<Document>> classAndDocs;
     private boolean isTrained;
+    private int nrOfFeatures = 2000;
 
     public Controller() {
-        baysianClassifier = new BayesianClassifier();
+        bayesianClassifier = new BayesianClassifier();
         classAndDocs = new HashMap<>();
         isTrained = false;
     }
     
     public void setChi(int amount) {
-    	
+    	this.nrOfFeatures = amount;
     }
+    
     public void addClassWithDocs(Class aClass, Set<Document> documents) {
         if (classAndDocs.containsKey(aClass)) {
             Set<Document> docs = classAndDocs.get(aClass);
@@ -37,7 +39,7 @@ public class Controller {
 
     public void train() {
         isTrained = true;
-        baysianClassifier.train(classAndDocs);
+        bayesianClassifier.train(classAndDocs, this.nrOfFeatures);
     }
 
     public boolean canClassify() {
@@ -49,15 +51,19 @@ public class Controller {
     }
 
     public BayesianClassifier getBaysianClassifier() {
-        return baysianClassifier;
+        return bayesianClassifier;
     }
 
 
     public Class classify(Document doc) {
-        return baysianClassifier.classify(doc);
+        return bayesianClassifier.classify(doc);
     }
 
     public Map<Class, Set<Document>> getClassAndDocs() {
         return classAndDocs;
     }
+
+	public void update(Document d, Class c) {
+		bayesianClassifier.train(d, c);
+	}
 }

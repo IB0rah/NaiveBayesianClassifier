@@ -61,6 +61,7 @@ public class Class {
 			conditionalProbabilities.put(word, conditionalProbability );
 		}
 		this.notExistingProbability = Math.log10(((double)(0 + SMOOTHING)) /((double)(this.getTotalNumberOfFeatures() + SMOOTHING * bc.getfeatureVocabularySize()))) / Math.log10(2.);
+		System.out.println(this.toString() + "TOTAL NUMBER OF FEATURES : " + this.conditionalProbabilities.size());
 	}
 	
 	public int getTotalNrOfDocs() {
